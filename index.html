@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+
+   <meta charset="UTF-8">
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+   <title>TerraLens AI | Gemini Edition</title>
+
+   
+
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+   <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+
+
+   <style>
+
+       :root {
+
+           --primary: #ff4757;  
+
+           --blue: #3742fa;
+
+           --dark: #2f3542;
+
+           --glass: rgba(255, 255, 255, 0.98);
+
+           --shadow: 0 20px 40px rgba(0,0,0,0.12);
+
+       }
+
+
+
+       body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; overflow: hidden; background: #f1f2f6; }
+
+       #map { width: 100vw; height: 100vh; z-index: 0; opacity: 0; transition: opacity 1.5s ease; background: #a8edea; }
+
+       .leaflet-routing-container { display: none !important; }
+
+
+
+       @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+       @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+
+       .floating { animation: float 4s ease-in-out infinite; }
+
+
+
+       .window {
+
+           opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95);
+
+           transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;
+
+       }
+
+       .window.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
+
+
+
+       #welcome-screen {
+
+           position: fixed; inset: 0; background: radial-gradient(circle at center, #ffffff 0%, #dfe4ea 100%);
+
+           z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.8s;
+
+       }
+
+       .welcome-card { text-align: center; background: white; padding: 50px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); max-width: 450px; }
+
+
+
+       button { border: none; outline: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+
+       button:hover { transform: scale(1.06); filter: brightness(1.05); }
+
+       button:active { transform: scale(0.96); }
+
+
+
+       .menu-btn {  
+
+           background: var(--glass); padding: 14px 22px; border-radius: 20px; font-weight: 800; color: var(--dark);
+
+           display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.5);
+
+       }
+
+       .menu-btn.active { background: var(--blue); color: white; box-shadow: 0 10px 20px rgba(55, 66, 250, 0.3); }
+
+
+
+       .search-wrapper {
+
+           position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+
+           z-index: 1000; display: flex; background: var(--glass); padding: 8px; border-radius: 50px; box-shadow: var(--shadow);
+
+       }
+
+       .search-input { border: none; background: transparent; padding: 0 20px; width: 300px; font-weight: 700; font-size: 16px; outline: none; }
+
+
+
+       .side-menu { position: absolute; top: 100px; left: 25px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+
+       .glass-panel { background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: var(--shadow); border: 1px solid white; }
+
+
+
+       #info-card { position: absolute; top: 25px; right: 25px; width: 340px; z-index: 1001; padding: 30px; animation: float 6s ease-in-out infinite; }
+
+       #chat-wrapper { position: absolute; bottom: 25px; left: 25px; width: 360px; z-index: 1001; }
+
+
+
+       .bot-head {
+
+           width: 80px; height: 70px; background: var(--primary); border-radius: 24px;
+
+           border: 4px solid #fff; position: relative; display: flex; justify-content: center; align-items: center;
+
+       }
+
+       .bot-face { width: 55px; height: 35px; background: #2f3542; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; overflow: hidden; }
+
+       .bot-eye { width: 8px; height: 12px; background: #7bed9f; border-radius: 4px; box-shadow: 0 0 10px #7bed9f; animation: blink 4s infinite; }
+
+       
+
+       .blush { position: absolute; bottom: 3px; width: 14px; height: 8px; display: flex; gap: 2px; opacity: 0; transition: 0.5s; }
+
+       .blush span { width: 2px; height: 100%; background: #ff4757; transform: rotate(20deg); border-radius: 5px; }
+
+       .blush.left { left: 5px; } .blush.right { right: 5px; }
+
+       .cute .blush { opacity: 0.8; }
+
+
+
+       #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(241, 242, 246, 0.4); }
+
+       .bubble { padding: 14px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; max-width: 85%; line-height: 1.5; }
+
+       .ai-msg { background: white; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+
+       .user-msg { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+       .typing::after { content: '|'; animation: blink 0.8s infinite; }
+
+
+
+       #rating-widget {
+
+           position: absolute; bottom: 25px; right: 25px; z-index: 1000;
+
+           display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+
+       }
+
+       .rating-bubble {
+
+           background: white; padding: 15px 20px; border-radius: 25px; box-shadow: var(--shadow);
+
+           max-width: 220px; font-size: 13px; font-weight: 800; color: var(--dark);
+
+           position: relative; margin-bottom: 5px; transform-origin: bottom right; transition: 0.5s;
+
+       }
+
+       .rating-bubble::after {
+
+           content: ''; position: absolute; bottom: -8px; right: 30px;
+
+           border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white;
+
+       }
+
+       .vote-btns { display: flex; gap: 15px; margin-top: 10px; justify-content: center; }
+
+       .vote-btns span { cursor: pointer; font-size: 24px; transition: 0.3s; }
+
+       .vote-btns span:hover { transform: scale(1.3); }
+
+   </style>
+
+</head>
+
+<body>
+
+
+
+   <div id="welcome-screen">
+
+       <div class="welcome-card floating">
+
+           <div class="bot-head" style="width:110px; height:95px; margin: 0 auto 30px; border-radius: 30px;">
+
+               <div class="bot-face" style="width:75px; height:50px;"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+
+           </div>
+
+           <h1 style="font-weight:900; font-size: 38px; color: var(--dark); margin: 0;">TerraLens AI</h1>
+
+           <p style="color: #747d8c; font-weight: 600; font-size: 16px; line-height: 1.6; margin: 20px 0 35px;">
+
+               Привет! Я TerraLens. Со мной ты найдешь гору информации с помощью передового ИИ.
+
+           </p>
+
+           <button onclick="startApp()" style="background: var(--primary); color: white; padding: 18px 45px; border-radius: 50px; font-weight: 900; font-size: 18px;">
+
+               НАЧАТЬ ПУТЕШЕСТВИЕ
+
+           </button>
+
+       </div>
+
+   </div>
+
+
+
+   <div id="map"></div>
+
+
+
+   <div id="rating-widget" style="opacity:0; transition: 1s;">
+
+       <div class="rating-bubble" id="rat-text">
+
+           Оцените наш сайт! Под ваше мнение мы будем улучшать и продвигать этот проект!
+
+           <div class="vote-btns" id="vote-controls">
+
+               <span onclick="addVote('like')">👍</span>
+
+               <span onclick="addVote('dislike')">👎</span>
+
+           </div>
+
+       </div>
+
+       <div class="bot-head floating" id="rat-bot">
+
+           <div class="bot-face">
+
+               <div class="blush left"><span></span><span></span><span></span></div>
+
+               <div class="bot-eye"></div><div class="bot-eye"></div>
+
+               <div class="blush right"><span></span><span></span><span></span></div>
+
+           </div>
+
+       </div>
+
+   </div>
+
+
+
+   <div class="ui-element search-wrapper" id="ui-search" style="opacity:0;">
+
+       <input type="text" class="search-input" id="global-search" placeholder="Куда отправимся?">
+
+       <button onclick="globalSearch()" style="background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 900;">ПОИСК</button>
+
+   </div>
+
+
+
+   <div class="ui-element side-menu" id="ui-menu" style="opacity:0;">
+
+       <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ КАРТА</button>
+
+       <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ СПУТНИК</button>
+
+       <button class="menu-btn" id="btn-route" onclick="toggleRoutePanel()">🚩 МАРШРУТЫ</button>
+
+       <div id="route-panel" class="glass-panel" style="display:none; flex-direction:column; gap:10px; padding:20px; margin-top:10px;">
+
+           <input type="text" id="start-inp" placeholder="Точка А" style="padding:12px; border-radius:15px; border:1px solid #eee;">
+
+           <input type="text" id="end-inp" placeholder="Точка Б" style="padding:12px; border-radius:15px; border:1px solid #eee;">
+
+           <div style="display:flex; gap:10px;">
+
+               <button onclick="buildRoute()" style="flex:1; background:var(--blue); color:white; padding:12px; border-radius:15px; font-weight:900;">ПУТЬ</button>
+
+               <button onclick="clearRoute()" class="menu-btn" style="padding:12px;">✖</button>
+
+           </div>
+
+       </div>
+
+       <button class="menu-btn" style="background:var(--primary); color:white;" onclick="toggleChat()">🤖 AI TERRABOT</button>
+
+   </div>
+
+
+
+   <div id="info-card" class="glass-panel window">
+
+       <div id="info-content">
+
+           <div style="display:flex; align-items:center; gap:20px;">
+
+               <img id="card-flag" src="" style="width:60px; border-radius:10px; display:none;">
+
+               <div>
+
+                   <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">--</h2>
+
+                   <div id="card-country" style="opacity:0.6; font-weight:800;">--</div>
+
+               </div>
+
+           </div>
+
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:20px 0;">
+
+               <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ТЕМПЕРАТУРА</div><div id="card-temp" style="font-size:18px; font-weight:900; color:var(--primary);">--</div></div>
+
+               <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВРЕМЯ</div><div id="card-time" style="font-size:18px; font-weight:900;">--</div></div>
+
+               <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВАЛЮТА</div><div id="card-curr" style="font-size:14px; font-weight:900; color:var(--primary);">--</div></div>
+
+               <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">UTC</div><div id="card-utc" style="font-size:18px; font-weight:900;">--</div></div>
+
+           </div>
+
+           <div id="card-wiki" style="font-size:14px; color:#57606f; line-height:1.6; max-height:150px; overflow-y:auto; padding:15px; background:rgba(0,0,0,0.03); border-radius:20px;"></div>
+
+       </div>
+
+       <button onclick="closeWindow('info-card')" style="width:100%; margin-top:25px; padding:15px; border-radius:20px; background:#dfe4ea; font-weight:800; color:var(--dark);">ЗАКРЫТЬ</button>
+
+   </div>
+
+
+
+   <div id="chat-wrapper" class="window">
+
+       <div class="bot-head floating" style="margin-bottom: -15px; margin-left: 30px; z-index:10;">
+
+           <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+
+       </div>
+
+       <div class="glass-panel" style="overflow:hidden; display:flex; flex-direction:column;">
+
+           <div style="padding:45px 20px 20px; text-align:center; font-weight:900; color:var(--primary); background:white;">TerraBot Gemini</div>
+
+           <div id="chat-log"></div>
+
+           <div style="padding:15px; background:white; display:flex; gap:10px; border-top:1px solid #f1f2f6;">
+
+               <input type="text" id="chat-input" placeholder="Задай вопрос ИИ..." style="flex:1; border:none; outline:none; font-weight:700; font-family:inherit;">
+
+               <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; font-size:20px;">➤</button>
+
+           </div>
+
+       </div>
+
+   </div>
+
+
+
+   <script>
+
+       // --- [1] ВСТАВЬ СВОЙ КЛЮЧ GEMINI НИЖЕ ---
+
+       const GEMINI_API_KEY = "ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ";
+
+
+
+       // --- [2] НАСТРОЙКИ FIREBASE ---
+
+       const firebaseConfig = {
+
+           apiKey: "AIzaSyAYSeXH7-5Y6iEVO0uPWiVeeICyImayWn4",
+
+           authDomain: "terralens-votes.firebaseapp.com",
+
+           databaseURL: "https://terralens-votes-default-rtdb.europe-west1.firebasedatabase.app",
+
+           projectId: "terralens-votes",
+
+           storageBucket: "terralens-votes.firebasestorage.app",
+
+           messagingSenderId: "306757191202",
+
+           appId: "1:306757191202:web:d9c18b023254b235bfec7b"
+
+       };
+
+       firebase.initializeApp(firebaseConfig);
+
+       const db = firebase.database();
+
+       let stats = { likes: 0, dislikes: 0 };
+
+       db.ref('votes').on('value', (s) => { if(s.exists()) stats = s.val(); });
+
+
+
+       let map, tileLayer, routingControl;
+
+
+
+       function startApp() {
+
+           document.getElementById('welcome-screen').style.opacity = '0';
+
+           setTimeout(() => {
+
+               document.getElementById('welcome-screen').style.display = 'none';
+
+               document.getElementById('map').style.opacity = '1';
+
+               document.getElementById('ui-search').style.opacity = '1';
+
+               document.getElementById('ui-menu').style.opacity = '1';
+
+               document.getElementById('rating-widget').style.opacity = '1';
+
+               initMap();
+
+               typeMessage("Привет! Я TerraBot, усиленный интеллектом Gemini. Спрашивай о чем угодно! 🌍");
+
+           }, 800);
+
+       }
+
+
+
+       function initMap() {
+
+           map = L.map('map', {  
+
+               center: [20, 0], zoom: 3, minZoom: 2, zoomControl: false, attributionControl: false,
+
+               maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1.0
+
+           });
+
+           tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { noWrap: true }).addTo(map);
+
+           map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
+
+       }
+
+
+
+       function addVote(type) {
+
+           db.ref(type === 'like' ? 'votes/likes' : 'votes/dislikes').transaction(c => (c || 0) + 1);
+
+           document.getElementById('vote-controls').style.display = 'none';
+
+           document.getElementById('rat-text').innerText = "Спасибо за ваше мнение! ❤️";
+
+           document.getElementById('rat-bot').classList.add('cute');
+
+           setTimeout(() => { document.getElementById('rating-widget').style.opacity = '0'; }, 3000);
+
+       }
+
+
+
+       // ГЛАВНАЯ ФУНКЦИЯ: GEMINI ИИ
+
+
+async function askGemini(prompt) {
+    try {
+        // Стучимся к нашей функции на Vercel
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: prompt })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.choices && data.choices[0]) {
+            return data.choices[0].message.content;
+        } else {
+            const errorText = data.error?.message || "Неизвестная ошибка сервера";
+            return `[Ошибка]: ${errorText}`;
+        }
+    } catch (e) {
+        return "[Ошибка сети]: Не удалось связаться с сервером. Проверь интернет.";
+    }
+}
+
+
+
+
+
+       async function sendChat() {
+
+           const input = document.getElementById('chat-input');
+
+           const log = document.getElementById('chat-log');
+
+           const q = input.value.trim();
+
+           if(!q) return;
+
+           
+
+           log.innerHTML += `<div class="bubble user-msg">${q}</div>`;
+
+           input.value = '';
+
+           log.scrollTop = log.scrollHeight;
+
+
+
+           if(q === '/ali09') {
+
+               typeMessage(`🛠 ADMIN\n👍 Likes: ${stats.likes}\n👎 Dislikes: ${stats.dislikes}`);
+
+               return;
+
+           }
+
+
+
+           // Сначала пробуем Gemini
+
+           let aiResponse = await askGemini(`Ты гид-географ TerraBot. Кратко ответь на вопрос: ${q}`);
+
+
+
+           try {
+
+               // Ищем место на карте через Википедию (как раньше)
+
+               const wikiSearch = await fetch(`https://ru.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=1&format=json&origin=*`).then(r=>r.json());
+
+               let searchName = (wikiSearch[1] && wikiSearch[1][0]) ? wikiSearch[1][0] : q;
+
+               const search = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchName)}&limit=1&accept-language=ru`).then(r=>r.json());
+
+               
+
+               if(search[0]) {
+
+                   const {lat, lon} = search[0];
+
+                   map.flyTo([lat, lon], 9);
+
+                   fetchInfo(lat, lon);
+
+                   if(!aiResponse) {
+
+                        const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchName)}`).then(r=>r.json());
+
+                        aiResponse = wiki.extract || `Нашел! Это ${searchName}.`;
+
+                   }
+
+               }
+
+
+
+               typeMessage(aiResponse || "Хмм, не могу найти это. Попробуй другой вопрос!");
+
+           } catch(e) { typeMessage("Упс, сбился прицел! Попробуй еще раз."); }
+
+       }
+
+
+
+       function typeMessage(text) {
+
+           const log = document.getElementById('chat-log');
+
+           const bubble = document.createElement('div');
+
+           bubble.className = 'bubble ai-msg typing';
+
+           log.appendChild(bubble);
+
+           let i = 0;
+
+           function type() {
+
+               if (i < text.length) {
+
+                   bubble.innerHTML += text.charAt(i); i++; log.scrollTop = log.scrollHeight; setTimeout(type, 15);
+
+               } else { bubble.classList.remove('typing'); }
+
+           }
+
+           type();
+
+       }
+
+
+
+       async function fetchInfo(lat, lon) {
+
+           document.getElementById('info-card').classList.add('active');
+
+           try {
+
+               const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
+
+               const city = geo.address.city || geo.address.town || geo.address.state || "Точка";
+
+               document.getElementById('card-city').innerText = city;
+
+               document.getElementById('card-country').innerText = geo.address.country || "";
+
+               const code = geo.address.country_code?.toUpperCase();
+
+               if(code) {
+
+                   document.getElementById('card-flag').src = `https://flagsapi.com/${code}/flat/64.png`;
+
+                   document.getElementById('card-flag').style.display = 'block';
+
+                   const cData = await fetch(`https://restcountries.com/v3.1/alpha/${code}`).then(r=>r.json());
+
+                   if(cData[0].currencies) {
+
+                       const cur = Object.keys(cData[0].currencies)[0];
+
+                       document.getElementById('card-curr').innerText = `${cur} (${cData[0].currencies[cur].symbol})`;
+
+                   }
+
+               }
+
+               const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`).then(r=>r.json());
+
+               document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
+
+               document.getElementById('card-utc').innerText = "UTC" + (w.utc_offset_seconds/3600 >= 0 ? "+" : "") + (w.utc_offset_seconds/3600);
+
+               const time = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (w.utc_offset_seconds * 1000));
+
+               document.getElementById('card-time').innerText = time.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+
+               const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
+
+               document.getElementById('card-wiki').innerText = wiki.extract || "Детальной справки пока нет.";
+
+           } catch(e) {}
+
+       }
+
+
+
+       function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
+
+       function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
+
+       function setMode(m) {
+
+           document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+
+           document.getElementById(m === 'sat' ? 'btn-sat' : 'btn-map').classList.add('active');
+
+           tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+       }
+
+       async function globalSearch() {
+
+           const q = document.getElementById('global-search').value;
+
+           if(!q) return;
+
+           const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(res => res.json());
+
+           if(r[0]) { map.flyTo([r[0].lat, r[0].lon], 10); fetchInfo(r[0].lat, r[0].lon); }
+
+           document.getElementById('global-search').value = '';  
+
+       }
+
+       function toggleRoutePanel() { document.getElementById('route-panel').style.display = (document.getElementById('route-panel').style.display === 'flex' ? 'none' : 'flex'); }
+
+       async function buildRoute() {
+
+           const s = document.getElementById('start-inp').value, e = document.getElementById('end-inp').value;
+
+           const r1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${s}&limit=1`).then(r=>r.json());
+
+           const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e}&limit=1`).then(r=>r.json());
+
+           if(r1[0] && r2[0]) {
+
+               if(routingControl) map.removeControl(routingControl);
+
+               routingControl = L.Routing.control({
+
+                   waypoints: [L.latLng(parseFloat(r1[0].lat), parseFloat(r1[0].lon)), L.latLng(parseFloat(r2[0].lat), parseFloat(r2[0].lon))],
+
+                   lineOptions: { styles: [{ color: '#3742fa', weight: 6, opacity: 0.8 }] },
+
+                   createMarker: () => null, show: false
+
+               }).addTo(map);
+
+           }
+
+       }
+
+       function clearRoute() { if(routingControl) map.removeControl(routingControl); document.getElementById('start-inp').value = ''; document.getElementById('end-inp').value = ''; }
+
+       document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChat(); });
+
+   </script>
+
+</body>
+
+</html>
+
