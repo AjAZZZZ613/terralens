@@ -378,6 +378,10 @@
 
    </div>
 
+   <div id="loader" style="display: none; color: #888; margin: 10px; font-size: 0.9em;">
+    ⚡ ТерраБот обрабатывает запрос...
+</div>
+
 
 
    <script>
@@ -486,6 +490,10 @@
 
 
 async function askGemini(prompt) {
+
+    const loader = document.getElementById("loader");
+    loader.style.display = "block";
+
     try {
         // Стучимся к нашей функции на Vercel
         const response = await fetch("/api/chat", {
@@ -495,6 +503,8 @@ async function askGemini(prompt) {
         });
 
         const data = await response.json();
+
+        loader.style.display = "none";
 
         if (response.ok && data.choices && data.choices[0]) {
             return data.choices[0].message.content;
