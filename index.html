@@ -120,69 +120,84 @@
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
 }
 
-/* Класс для показа карточки */
+.side-donate-card {
+    position: fixed;
+    bottom: 20px; 
+    right: 20px;
+    width: 260px; /* Компактный размер */
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    z-index: 1000;
+    border: 1px solid #eeeeee;
+    
+    /* Анимация появления */
+    transform: translateX(150%);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s;
+}
+
 .side-donate-card.show {
     transform: translateX(0);
     opacity: 1;
 }
 
-/* Внутренности */
-.side-donate-content {
-    text-align: center;
-}
-
-.side-mascot {
-    font-size: 50px;
-    margin-bottom: 10px;
+/* Картинка маскота как в оценке */
+.side-mascot-img {
+    width: 60px; 
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .side-text {
-    font-size: 14px;
+    font-size: 13px;
     color: #444;
+    text-align: center;
+    margin-bottom: 18px;
     line-height: 1.4;
-    margin-bottom: 15px;
 }
 
-/* Контейнер кнопок (одна под другой для красоты) */
 .side-buttons {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-/* Сочная кнопка с сердечком */
 .btn-donate-heart {
-    background: #ff4b4b; /* Ярко-красный/розовый */
+    background: #ff4b4b;
     color: white;
     text-decoration: none;
     padding: 12px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: bold;
-    transition: background 0.2s, transform 0.2s;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    transition: 0.2s;
 }
 
 .btn-donate-heart:hover {
-    background: #ff3333;
-    transform: scale(1.02);
+    background: #e83e3e;
+    transform: translateY(-2px);
 }
 
-/* Кнопка "Воздержаться" — неприметная, но стильная */
 .btn-donate-skip {
-    background: transparent;
+    background: none;
     border: none;
-    color: #999;
-    font-size: 13px;
+    color: #aaa;
+    font-size: 12px;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 10px;
-    transition: color 0.2s, background 0.2s;
+    padding: 5px;
 }
 
 .btn-donate-skip:hover {
-    color: #666;
-    background: #f5f5f5;
+    color: #777;
 }
+
    </style>
 </head>
 <body>
@@ -283,11 +298,12 @@
 
 <div id="side-donate-widget" class="side-donate-card">
     <div class="side-donate-content">
-        <div class="side-mascot">🤖</div> 
+        <img src="mascot.png" alt="Mascot" class="side-mascot-img"> 
+        
         <p class="side-text">Можете поддержать сайт копеечкой. Все средства идут на оплату сервера и API.</p>
         
         <div class="side-buttons">
-            <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" onclick="closeSideDonate()" class="btn-donate-heart">
+            <a href="ТВОЯ_ССЫЛКА_НА_ДОНАТ" target="_blank" onclick="closeSideDonate()" class="btn-donate-heart">
                 Поддержать ❤️
             </a>
             <button onclick="closeSideDonate()" class="btn-donate-skip">
@@ -474,16 +490,14 @@
        function clearRoute() { if(routingControl) map.removeControl(routingControl); document.getElementById('start-inp').value = ''; document.getElementById('end-inp').value = ''; }
        document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChat(); });
 
-// Функция показа (карточка выезжает справа)
 function showSideDonate() {
     const widget = document.getElementById('side-donate-widget');
     widget.classList.add('show');
 }
 
-// Запускаем, например, через 15 секунд
+// Показать через 15 секунд после загрузки
 setTimeout(showSideDonate, 15000);
 
-// Функция скрытия (карточка уезжает обратно вправо)
 function closeSideDonate() {
     const widget = document.getElementById('side-donate-widget');
     widget.classList.remove('show');
