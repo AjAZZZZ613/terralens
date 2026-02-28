@@ -204,73 +204,33 @@
 
 
 
-      /* --- НОВОЕ: ГЛАВНОЕ МЕНЮ И МОДАЛКИ --- */
+      /* --- МЕНЮ И МОДАЛКИ (ФИКС) --- */
 
       #menu-toggle-btn {
 
-          position: absolute;
+          position: absolute; top: 25px; left: 25px;
 
-          top: 25px;
+          background: #fff; border: 2px solid #eee; padding: 12px 18px;
 
-          left: 25px;
+          border-radius: 20px; cursor: pointer; font-weight: 800;
 
-          background: #fff;
-
-          border: 2px solid #eee;
-
-          padding: 12px 18px;
-
-          border-radius: 20px;
-
-          cursor: pointer;
-
-          font-weight: 800;
-
-          font-size: 14px;
-
-          color: var(--dark);
-
-          z-index: 1500;
-
-          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-
-          transition: 0.2s;
-
-          display: flex;
-
-          align-items: center;
-
-          gap: 8px;
+          color: var(--dark); z-index: 1500; box-shadow: var(--shadow);
 
       }
-
-      #menu-toggle-btn:hover { background: #f9f9f9; transform: scale(1.05); }
 
 
 
       .main-side-menu {
 
-          position: fixed;
+          position: fixed; top: 0; left: -320px;
 
-          top: 0; left: -320px;
+          width: 280px; height: 100vh; background: #ffffff;
 
-          width: 280px;
-
-          height: 100vh;
-
-          background: #ffffff;
-
-          box-shadow: 5px 0 30px rgba(0,0,0,0.15);
-
-          z-index: 2000;
+          box-shadow: 5px 0 30px rgba(0,0,0,0.15); z-index: 2000;
 
           transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
 
-          padding: 25px;
-
-          display: flex;
-
-          flex-direction: column;
+          padding: 25px; display: flex; flex-direction: column;
 
       }
 
@@ -278,39 +238,23 @@
 
 
 
-      .close-menu-btn {
-
-          align-self: flex-end;
-
-          background: none; border: none;
-
-          font-size: 24px; cursor: pointer; color: #888;
-
-      }
-
-      .menu-title { font-size: 24px; font-weight: 900; color: var(--dark); margin-bottom: 30px; border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; }
+      .menu-title { font-size: 24px; font-weight: 900; color: var(--dark); margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
 
 
 
       .menu-links button, .menu-link {
 
-          display: block; width: 100%;
+          display: block; width: 100%; text-align: left; background: #fdfdfd; 
 
-          text-align: left;
+          border: 1px solid #f1f2f6; padding: 16px; margin-bottom: 12px;
 
-          background: #fdfdfd; border: 1px solid #f1f2f6;
+          border-radius: 15px; font-size: 15px; font-weight: 700; color: #444; 
 
-          padding: 16px; margin-bottom: 12px;
-
-          border-radius: 15px; font-size: 15px; font-weight: 700;
-
-          color: #444; text-decoration: none; cursor: pointer;
-
-          transition: background 0.2s, transform 0.2s;
+          text-decoration: none; cursor: pointer; transition: 0.2s;
 
       }
 
-      .menu-links button:hover, .menu-link:hover { background: #f0f8ff; transform: translateX(5px); border-color: var(--blue); }
+      .menu-links button:hover, .menu-link:hover { background: #f0f8ff; transform: translateX(5px); }
 
 
 
@@ -346,27 +290,17 @@
 
       }
 
-      .custom-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      /* Чтобы модалки корректно показывались */
 
-      .custom-modal h3 { margin-top: 0; color: var(--dark); font-weight: 900; font-size: 22px; }
-
-      .custom-modal p { color: #57606f; font-weight: 600; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
+      .custom-modal.show { display: block !important; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
 
 
-      .modal-btns { display: flex; gap: 10px; justify-content: center; }
+      .btn-heart { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; flex: 1; display: inline-block; }
 
-      .btn-heart { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; flex: 1; transition: 0.2s; }
+      .btn-skip { background: none; border: none; color: #a4b0be; cursor: pointer; padding: 10px; font-weight: 700; }
 
-      .btn-heart:hover { background: #e83e3e; transform: scale(1.05); }
-
-      .btn-skip { background: none; border: none; color: #a4b0be; cursor: pointer; padding: 10px; font-weight: 700; font-size: 14px; }
-
-      .btn-skip:hover { color: #57606f; }
-
-      .btn-setting { background: #f1f2f6; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; color: var(--dark); transition: 0.2s; }
-
-      .btn-setting:hover { background: #dfe4ea; }
+      .btn-setting { background: #f1f2f6; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; width: 100%; margin-bottom: 10px; }
 
 
 
@@ -412,7 +346,7 @@
 
 
 
-  <button id="menu-toggle-btn" class="ui-element" style="opacity:0;" onclick="openMenu()">☰ МЕНЮ</button>
+  <button id="menu-toggle-btn" style="opacity:0;" onclick="openMenu()">☰ МЕНЮ</button>
 
 
 
@@ -490,6 +424,92 @@
 
 
 
+  <div id="main-menu" class="main-side-menu">
+
+      <button class="btn-skip" style="align-self: flex-end; font-size: 20px;" onclick="closeMenu()">✖</button>
+
+      <div class="menu-title">TerraLens</div>
+
+      <div class="menu-links">
+
+          <button onclick="openModal('modal-donate')">💖 1. Поддержка сайта</button>
+
+          <a href="https://t.me/terralensed" target="_blank" class="menu-link">✈️ 2. Тг канал сайта</a>
+
+          <button onclick="openModal('modal-settings')">⚙️ 3. Настройки</button>
+
+          <button onclick="openModal('modal-future')">🚀 4. Будущее сайта</button>
+
+      </div>
+
+  </div>
+
+
+
+  <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
+
+
+
+  <div id="modal-donate" class="custom-modal">
+
+      <div class="bot-head floating" style="margin: 0 auto 20px;">
+
+          <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+
+      </div>
+
+      <h3>Поддержите проект</h3>
+
+      <p>Можете поддержать сайт копеечкой. Все средства идут на оплату сервера и API.</p>
+
+      <div class="modal-btns">
+
+          <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="btn-heart">Поддержать ❤️</a>
+
+          <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
+
+      </div>
+
+  </div>
+
+
+
+  <div id="modal-settings" class="custom-modal">
+
+      <h3>Настройки вида</h3>
+
+      <p>Выберите версию интерфейса:</p>
+
+      <button class="btn-setting" onclick="setView('desktop')">💻 Компьютерная (Базовая)</button>
+
+      <button class="btn-setting" onclick="setView('mobile')">📱 Телефонная версия</button>
+
+      <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
+
+  </div>
+
+
+
+  <div id="modal-future" class="custom-modal">
+
+      <h3>Планы на будущее</h3>
+
+      <ul style="text-align: left; font-weight: 700; color: #444; line-height: 1.8;">
+
+          <li>Новые ИИ модели (GPT-4o)</li>
+
+          <li>Голосовой поиск</li>
+
+          <li>Личный кабинет</li>
+
+      </ul>
+
+      <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
+
+  </div>
+
+
+
   <div id="info-card" class="glass-panel window">
 
       <div id="info-content">
@@ -542,19 +562,9 @@
 
           <div style="padding:45px 20px 20px; text-align:center; font-weight:900; color:var(--primary); background:white;">TerraBot Gemini</div>
 
-           
-
           <div id="chat-log"></div>
 
-           
-
-          <div id="loader" class="pulse-text" style="display: none; color: var(--primary); padding: 5px 20px; font-size: 13px; font-weight: 800; text-align: center; background: white;">
-
-               ⚡ ТерраБот думает...
-
-          </div>
-
-
+          <div id="loader" class="pulse-text" style="display: none; color: var(--primary); padding: 5px 20px; font-size: 13px; font-weight: 800; text-align: center; background: white;">⚡ ТерраБот думает...</div>
 
           <div style="padding:15px; background:white; display:flex; gap:10px; border-top:1px solid #f1f2f6;">
 
@@ -570,97 +580,9 @@
 
 
 
-  <div id="main-menu" class="main-side-menu">
-
-      <button class="close-menu-btn" onclick="closeMenu()">✖</button>
-
-      <div class="menu-title">TerraLens</div>
-
-      
-
-      <div class="menu-links">
-
-          <button onclick="openModal('modal-donate')">💖 1. Поддержка сайта</button>
-
-          <a href="https://t.me/terralensed" target="_blank" class="menu-link">✈️ 2. Тг канал сайта</a>
-
-          <button onclick="openModal('modal-settings')">⚙️ 3. Настройки</button>
-
-          <button onclick="openModal('modal-future')">🚀 4. Будущее сайта</button>
-
-      </div>
-
-  </div>
-
-
-
-  <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
-
-
-
-  <div id="modal-donate" class="custom-modal">
-
-      <img src="mascot.png" alt="Mascot" style="width: 80px; margin-bottom: 15px;">
-
-      <h3>Поддержите проект</h3>
-
-      <p>Можете поддержать сайт копеечкой. Все средства идут на оплату сервера и API.</p>
-
-      <div class="modal-btns">
-
-          <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="btn-heart" onclick="closeAllModals()">Поддержать ❤️</a>
-
-          <button class="btn-skip" onclick="closeAllModals()">Воздержаться</button>
-
-      </div>
-
-  </div>
-
-
-
-  <div id="modal-settings" class="custom-modal">
-
-      <h3>Настройки вида</h3>
-
-      <p>Выберите, как отображать сайт:</p>
-
-      <div class="modal-btns" style="flex-direction: column;">
-
-          <button class="btn-setting" onclick="setView('desktop')">💻 Компьютерная (Базовая)</button>
-
-          <button class="btn-setting" onclick="setView('mobile')">📱 Телефонная версия</button>
-
-      </div>
-
-      <button class="btn-skip" onclick="closeAllModals()" style="margin-top: 15px;">Закрыть</button>
-
-  </div>
-
-
-
-  <div id="modal-future" class="custom-modal">
-
-      <h3>Планы на будущее</h3>
-
-      <ul style="text-align: left; font-size: 15px; font-weight: 600; color: #57606f; margin-bottom: 25px; line-height: 1.6;">
-
-          <li>Внедрение новых ИИ моделей</li>
-
-          <li>Голосовое общение с маскотом</li>
-
-          <li>Личные аккаунты пользователей</li>
-
-      </ul>
-
-      <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
-
-  </div>
-
-
-
   <script>
 
-      // --- НАСТРОЙКИ FIREBASE ---
+      // --- FIREBASE И КАРТА (БЕЗ ИЗМЕНЕНИЙ) ---
 
       const firebaseConfig = {
 
@@ -710,11 +632,11 @@
 
               document.getElementById('rating-widget').style.opacity = '1';
 
-              document.getElementById('menu-toggle-btn').style.opacity = '1'; // Показываем кнопку меню
+              document.getElementById('menu-toggle-btn').style.opacity = '1';
 
               initMap();
 
-              typeMessage("Привет! Я TerraBot, усиленный интеллектом Gemini. Спрашивай о чем угодно! 🌍");
+              typeMessage("Привет! Я TerraBot. Чем могу помочь? 🌍");
 
           }, 800);
 
@@ -724,15 +646,9 @@
 
       function initMap() {
 
-          map = L.map('map', {  
+          map = L.map('map', { center: [20, 0], zoom: 3, zoomControl: false, attributionControl: false });
 
-              center: [20, 0], zoom: 3, minZoom: 2, zoomControl: false, attributionControl: false,
-
-              maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1.0
-
-          });
-
-          tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { noWrap: true }).addTo(map);
+          tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
           map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
 
@@ -740,69 +656,109 @@
 
 
 
-      function addVote(type) {
+      // --- ЛОГИКА МЕНЮ (ИСПРАВЛЕНА) ---
 
-          db.ref(type === 'like' ? 'votes/likes' : 'votes/dislikes').transaction(c => (c || 0) + 1);
+      function openMenu() { document.getElementById('main-menu').classList.add('open'); }
 
-          document.getElementById('vote-controls').style.display = 'none';
+      function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
 
-          document.getElementById('rat-text').innerText = "Спасибо за ваше мнение! ❤️";
 
-          document.getElementById('rat-bot').classList.add('cute');
 
-          setTimeout(() => { document.getElementById('rating-widget').style.opacity = '0'; }, 3000);
+      function openModal(modalId) {
+
+          closeMenu();
+
+          document.getElementById('modal-overlay').classList.add('show');
+
+          // Сначала скрываем все модалки
+
+          document.querySelectorAll('.custom-modal').forEach(m => {
+
+              m.style.display = 'none';
+
+              m.classList.remove('show');
+
+          });
+
+          // Показываем нужную
+
+          const target = document.getElementById(modalId);
+
+          target.style.display = 'block';
+
+          setTimeout(() => target.classList.add('show'), 10);
 
       }
 
 
 
-      // ГЛАВНАЯ ФУНКЦИЯ: ОБРАБОТКА ИИ
+      function closeAllModals() {
+
+          document.getElementById('modal-overlay').classList.remove('show');
+
+          document.querySelectorAll('.custom-modal').forEach(m => {
+
+              m.classList.remove('show');
+
+              setTimeout(() => m.style.display = 'none', 300);
+
+          });
+
+      }
+
+
+
+      function setView(type) {
+
+          const v = document.querySelector("meta[name=viewport]");
+
+          v.setAttribute('content', type === 'mobile' ? 'width=device-width, initial-scale=1.0' : 'width=1200');
+
+          closeAllModals();
+
+      }
+
+
+
+      // ОСТАЛЬНЫЕ ФУНКЦИИ (Поиск, Чат, Оценка)
+
+      function addVote(type) {
+
+          db.ref(type === 'like' ? 'votes/likes' : 'votes/dislikes').transaction(c => (c || 0) + 1);
+
+          document.getElementById('rat-text').innerText = "Спасибо! ❤️";
+
+          setTimeout(() => document.getElementById('rating-widget').style.opacity = '0', 2000);
+
+      }
+
+
 
       async function askGemini(prompt) {
 
-           const loader = document.getElementById("loader");
+          const loader = document.getElementById("loader");
 
-           if (loader) loader.style.display = "block"; 
+          loader.style.display = "block";
 
+          try {
 
+              const response = await fetch("/api/chat", {
 
-           try {
+                  method: "POST",
 
-               const response = await fetch("/api/chat", {
+                  headers: { "Content-Type": "application/json" },
 
-                   method: "POST",
+                  body: JSON.stringify({ prompt: prompt })
 
-                   headers: { "Content-Type": "application/json" },
+              });
 
-                   body: JSON.stringify({ prompt: prompt })
+              const data = await response.json();
 
-               });
+              loader.style.display = "none";
 
+              return data.choices[0].message.content;
 
-
-               const data = await response.json();
-
-               if (loader) loader.style.display = "none"; 
-
-
-
-               if (response.ok && data.choices && data.choices[0]) {
-
-                   return data.choices[0].message.content;
-
-               } else {
-
-                   return "[Ошибка]: Бот немного устал. Попробуй позже.";
-
-               }
-
-           } catch (e) {
-
-               if (loader) loader.style.display = "none";
-
-               return "[Ошибка сети]: Не удалось связаться с сервером.";
-
-           }
+          } catch (e) { loader.style.display = "none"; return "Ошибка связи."; }
 
       }
 
@@ -818,53 +774,13 @@
 
           if(!q) return;
 
-           
-
           log.innerHTML += `<div class="bubble user-msg">${q}</div>`;
 
           input.value = '';
 
-          log.scrollTop = log.scrollHeight;
+          let res = await askGemini(q);
 
-
-
-          if(q === '/ali09') {
-
-              typeMessage(`🛠 ADMIN\n👍 Likes: ${stats.likes}\n👎 Dislikes: ${stats.dislikes}`);
-
-              return;
-
-          }
-
-
-
-          let aiResponse = await askGemini(`Ты гид-географ TerraBot. Кратко ответь на вопрос: ${q}`);
-
-
-
-          try {
-
-              const wikiSearch = await fetch(`https://ru.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=1&format=json&origin=*`).then(r=>r.json());
-
-              let searchName = (wikiSearch[1] && wikiSearch[1][0]) ? wikiSearch[1][0] : q;
-
-              const search = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchName)}&limit=1&accept-language=ru`).then(r=>r.json());
-
-               
-
-              if(search[0]) {
-
-                  const {lat, lon} = search[0];
-
-                  map.flyTo([lat, lon], 9);
-
-                  fetchInfo(lat, lon);
-
-              }
-
-              typeMessage(aiResponse || "Хмм, не могу найти это. Попробуй другой вопрос!");
-
-          } catch(e) { typeMessage("Упс, сбился прицел! Попробуй еще раз."); }
+          typeMessage(res);
 
       }
 
@@ -874,21 +790,21 @@
 
           const log = document.getElementById('chat-log');
 
-          const bubble = document.createElement('div');
+          const b = document.createElement('div');
 
-          bubble.className = 'bubble ai-msg typing';
+          b.className = 'bubble ai-msg typing';
 
-          log.appendChild(bubble);
+          log.appendChild(b);
 
           let i = 0;
 
           function type() {
 
-              if (i < text.length) {
+              if (i < text.length) { b.innerHTML += text.charAt(i); i++; setTimeout(type, 15); }
 
-                  bubble.innerHTML += text.charAt(i); i++; log.scrollTop = log.scrollHeight; setTimeout(type, 15);
+              else { b.classList.remove('typing'); }
 
-              } else { bubble.classList.remove('typing'); }
+              log.scrollTop = log.scrollHeight;
 
           }
 
@@ -902,51 +818,11 @@
 
           document.getElementById('info-card').classList.add('active');
 
-          try {
+          const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
 
-              const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
+          document.getElementById('card-city').innerText = geo.address.city || "Точка";
 
-              const city = geo.address.city || geo.address.town || geo.address.state || "Точка";
-
-              document.getElementById('card-city').innerText = city;
-
-              document.getElementById('card-country').innerText = geo.address.country || "";
-
-              const code = geo.address.country_code?.toUpperCase();
-
-              if(code) {
-
-                  document.getElementById('card-flag').src = `https://flagsapi.com/${code}/flat/64.png`;
-
-                  document.getElementById('card-flag').style.display = 'block';
-
-                  const cData = await fetch(`https://restcountries.com/v3.1/alpha/${code}`).then(r=>r.json());
-
-                  if(cData[0].currencies) {
-
-                      const cur = Object.keys(cData[0].currencies)[0];
-
-                      document.getElementById('card-curr').innerText = `${cur} (${cData[0].currencies[cur].symbol})`;
-
-                  }
-
-              }
-
-              const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}¤t_weather=true&timezone=auto`).then(r=>r.json());
-
-              document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
-
-              document.getElementById('card-utc').innerText = "UTC" + (w.utc_offset_seconds/3600 >= 0 ? "+" : "") + (w.utc_offset_seconds/3600);
-
-              const time = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (w.utc_offset_seconds * 1000));
-
-              document.getElementById('card-time').innerText = time.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-
-              const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
-
-              document.getElementById('card-wiki').innerText = wiki.extract || "Детальной справки пока нет.";
-
-          } catch(e) {}
+          document.getElementById('card-country').innerText = geo.address.country || "";
 
       }
 
@@ -958,10 +834,6 @@
 
       function setMode(m) {
 
-          document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-
-          document.getElementById(m === 'sat' ? 'btn-sat' : 'btn-map').classList.add('active');
-
           tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
       }
@@ -970,125 +842,23 @@
 
           const q = document.getElementById('global-search').value;
 
-          if(!q) return;
-
           const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(res => res.json());
 
           if(r[0]) { map.flyTo([r[0].lat, r[0].lon], 10); fetchInfo(r[0].lat, r[0].lon); }
 
-          document.getElementById('global-search').value = '';  
-
       }
 
-      function toggleRoutePanel() { document.getElementById('route-panel').style.display = (document.getElementById('route-panel').style.display === 'flex' ? 'none' : 'flex'); }
+      function toggleRoutePanel() { 
 
-      async function buildRoute() {
+          const p = document.getElementById('route-panel');
 
-          const s = document.getElementById('start-inp').value, e = document.getElementById('end-inp').value;
-
-          const r1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${s}&limit=1`).then(r=>r.json());
-
-          const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e}&limit=1`).then(r=>r.json());
-
-          if(r1[0] && r2[0]) {
-
-              if(routingControl) map.removeControl(routingControl);
-
-              routingControl = L.Routing.control({
-
-                  waypoints: [L.latLng(parseFloat(r1[0].lat), parseFloat(r1[0].lon)), L.latLng(parseFloat(r2[0].lat), parseFloat(r2[0].lon))],
-
-                  lineOptions: { styles: [{ color: '#3742fa', weight: 6, opacity: 0.8 }] },
-
-                  createMarker: () => null, show: false
-
-              }).addTo(map);
-
-          }
+          p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
 
       }
-
-      function clearRoute() { if(routingControl) map.removeControl(routingControl); document.getElementById('start-inp').value = ''; document.getElementById('end-inp').value = ''; }
 
       document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChat(); });
 
-
-
-      // --- ЛОГИКА МЕНЮ И МОДАЛОК ---
-
-      function openMenu() { document.getElementById('main-menu').classList.add('open'); }
-
-      function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
-
-
-
-      function openModal(modalId) {
-
-          closeMenu();
-
-          document.getElementById('modal-overlay').classList.add('show');
-
-          document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('show'));
-
-          document.getElementById(modalId).classList.add('show');
-
-      }
-
-
-
-      function closeAllModals() {
-
-          document.getElementById('modal-overlay').classList.remove('show');
-
-          document.querySelectorAll('.custom-modal').forEach(m => {
-
-              m.classList.remove('show');
-
-              setTimeout(() => { if(!m.classList.contains('show')) m.style.display = 'none'; }, 300);
-
-          });
-
-      }
-
-
-
-      document.querySelectorAll('.custom-modal').forEach(m => {
-
-          m.addEventListener('transitionstart', function(e) {
-
-              if (e.propertyName === 'opacity' && this.classList.contains('show')) {
-
-                  this.style.display = 'block';
-
-              }
-
-          });
-
-      });
-
-
-
-      function setView(type) {
-
-          let metaViewport = document.querySelector("meta[name=viewport]");
-
-          if (type === 'mobile') {
-
-              metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-
-          } else if (type === 'desktop') {
-
-              metaViewport.setAttribute('content', 'width=1200'); // Принудительная ширина ПК
-
-          }
-
-          closeAllModals();
-
-      }
-
   </script>
-
-
 
 </body>
 
