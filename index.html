@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <title>TerraLens AI | Ultimate Edition</title>
+  <title>TerraLens AI | Fixed Edition</title>
 
    
 
@@ -46,7 +46,7 @@
 
       body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; overflow: hidden; background: #f1f2f6; }
 
-      #map { width: 100vw; height: 100vh; z-index: 0; opacity: 0; transition: opacity 1.5s ease; }
+      #map { width: 100vw; height: 100vh; z-index: 0; opacity: 1; transition: opacity 0.5s; }
 
 
 
@@ -60,7 +60,9 @@
 
 
 
-      /* ОКНА */
+      /* ИНФО-КАРТОЧКА */
+
+      #info-card { position: absolute; top: 20px; right: 20px; width: 350px; z-index: 1001; padding: 25px; }
 
       .window {
 
@@ -74,21 +76,17 @@
 
 
 
-      /* ИНФО-КАРТОЧКА (ПОЛНАЯ) */
+      .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
 
-      #info-card { position: absolute; top: 20px; right: 20px; width: 350px; z-index: 1001; padding: 25px; }
-
-      .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-
-      .stat-item { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 15px; }
+      .stat-item { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 12px; }
 
       .stat-label { font-size: 10px; font-weight: 800; color: #a4b0be; text-transform: uppercase; }
 
-      .stat-val { font-size: 14px; font-weight: 900; color: var(--dark); }
+      .stat-val { font-size: 13px; font-weight: 900; color: var(--dark); }
 
 
 
-      /* ЧАТ (УВЕЛИЧЕННЫЙ) */
+      /* ЧАТ */
 
       #chat-wrapper { position: absolute; bottom: 20px; left: 20px; width: 400px; z-index: 1001; }
 
@@ -116,11 +114,11 @@
 
 
 
-      /* МЕНЮ И КНОПКИ */
+      /* МЕНЮ */
 
       .side-menu-btns { position: absolute; top: 80px; left: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
 
-      .menu-btn { background: var(--glass); padding: 12px 18px; border-radius: 18px; font-weight: 800; border: 1px solid rgba(0,0,0,0.05); }
+      .menu-btn { background: var(--glass); padding: 12px 18px; border-radius: 18px; font-weight: 800; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
 
       .menu-btn.active { background: var(--blue) !important; color: white !important; }
 
@@ -130,7 +128,7 @@
 
           position: fixed; top: 0; left: -320px; width: 280px; height: 100vh;
 
-          background: white; z-index: 2000; transition: 0.4s; padding: 25px; overflow-x: hidden;
+          background: white; z-index: 2000; transition: 0.4s; padding: 25px; box-sizing: border-box;
 
       }
 
@@ -142,33 +140,39 @@
 
           padding: 15px; margin-bottom: 10px; border-radius: 15px; 
 
-          background: #f8f9fa; text-decoration: none; color: var(--dark); font-weight: 800;
+          background: #f8f9fa; text-decoration: none; color: var(--dark); font-weight: 800; border: none; text-align: left; cursor: pointer;
 
       }
 
 
 
-      /* МОДАЛКИ */
+      /* МОДАЛКИ (ФИКС) */
+
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 3000; display: none; opacity: 0; transition: 0.3s; }
+
+      .modal-overlay.show { display: block; opacity: 1; }
+
+      
 
       .custom-modal {
 
-          position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+          position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
 
-          background: white; padding: 30px; border-radius: 25px; width: 320px;
+          background: white; padding: 30px; border-radius: 30px; width: 320px;
 
-          z-index: 3001; display: none; text-align: center; box-shadow: var(--shadow);
+          z-index: 3001; display: none; text-align: center; box-shadow: var(--shadow); transition: 0.3s;
 
       }
 
-      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 3000; display: none; }
+      .custom-modal.show { display: block !important; transform: translate(-50%, -50%) scale(1); }
 
 
 
-      /* БОТ */
+      /* БОТ (МАСКОТ) */
 
       .bot-head { width: 70px; height: 60px; background: var(--primary); border-radius: 20px; border: 3px solid #fff; display: flex; justify-content: center; align-items: center; margin: 0 auto; }
 
-      .bot-face { width: 45px; height: 30px; background: #2f3542; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 5px; }
+      .bot-face { width: 45px; height: 30px; background: #2f3542; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 5px; overflow: hidden; }
 
       .bot-eye { width: 6px; height: 10px; background: #7bed9f; border-radius: 3px; animation: blink 4s infinite; }
 
@@ -184,19 +188,19 @@
 
 
 
-  <div class="search-wrapper" id="ui-search">
+  <div class="search-wrapper">
 
       <input type="text" id="global-search" class="search-input" placeholder="Поиск места...">
 
-      <button onclick="globalSearch()" style="background:var(--primary); color:white; padding:10px 20px; border-radius:50px; font-weight:900;">НАЙТИ</button>
+      <button onclick="globalSearch()" style="background:var(--primary); color:white; padding:10px 20px; border-radius:50px; font-weight:900; border:none; cursor:pointer;">НАЙТИ</button>
 
   </div>
 
 
 
-  <div class="side-menu-btns" id="ui-menu">
+  <div class="side-menu-btns">
 
-      <button id="menu-toggle-btn" class="menu-btn" onclick="openMenu()">☰ МЕНЮ</button>
+      <button class="menu-btn" onclick="openMenu()">☰ МЕНЮ</button>
 
       <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ КАРТА</button>
 
@@ -210,18 +214,6 @@
 
 
 
-  <div id="route-panel" class="glass-panel" style="display:none; position:absolute; top:80px; left:120px; z-index:1000; padding:20px; flex-direction:column; gap:10px;">
-
-      <input type="text" id="start-inp" placeholder="Откуда" style="padding:10px; border-radius:10px; border:1px solid #ddd;">
-
-      <input type="text" id="end-inp" placeholder="Куда" style="padding:10px; border-radius:10px; border:1px solid #ddd;">
-
-      <button onclick="buildRoute()" style="background:var(--blue); color:white; padding:10px; border-radius:10px; font-weight:900;">ПОСТРОИТЬ</button>
-
-  </div>
-
-
-
   <div id="info-card" class="glass-panel window floating">
 
       <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
@@ -230,9 +222,9 @@
 
           <div>
 
-              <h2 id="card-city" style="margin:0; font-size:22px; font-weight:900;">Загрузка...</h2>
+              <h2 id="card-city" style="margin:0; font-size:22px; font-weight:900;">Город</h2>
 
-              <div id="card-country" style="opacity:0.6; font-size:14px; font-weight:800;">Определяем...</div>
+              <div id="card-country" style="opacity:0.6; font-size:14px; font-weight:800;">Страна</div>
 
           </div>
 
@@ -246,13 +238,13 @@
 
           <div class="stat-item"><div class="stat-label">Валюта</div><div id="card-curr" class="stat-val">--</div></div>
 
-          <div class="stat-item"><div class="stat-label">UTC / Коорд.</div><div id="card-utc" class="stat-val">--</div></div>
+          <div class="stat-item"><div class="stat-label">Координаты</div><div id="card-utc" class="stat-val">--</div></div>
 
       </div>
 
-      <div id="card-wiki" style="font-size:13px; line-height:1.5; color:#57606f; max-height:100px; overflow-y:auto; padding-right:5px;"></div>
+      <div id="card-wiki" style="font-size:13px; line-height:1.5; color:#57606f; max-height:100px; overflow-y:auto;"></div>
 
-      <button onclick="closeWindow('info-card')" style="width:100%; margin-top:15px; padding:12px; border-radius:15px; background:#eee; font-weight:800;">ЗАКРЫТЬ</button>
+      <button onclick="closeWindow('info-card')" style="width:100%; margin-top:15px; padding:12px; border-radius:15px; background:#eee; font-weight:800; border:none; cursor:pointer;">ЗАКРЫТЬ</button>
 
   </div>
 
@@ -262,17 +254,15 @@
 
       <div class="bot-head floating" style="margin-bottom:-10px; z-index:11;"><div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div></div>
 
-      <div class="glass-panel" style="overflow:hidden; border-radius:30px;">
+      <div class="glass-panel" style="overflow:hidden; border-radius:30px; background:var(--glass); backdrop-filter:blur(10px); border:1px solid white;">
 
           <div id="chat-log"></div>
 
-          <div id="loader" style="display:none; text-align:center; padding:10px; font-weight:800; color:var(--primary);">⚡ TerraBot думает...</div>
-
           <div style="padding:15px; background:white; display:flex; gap:10px;">
 
-              <input type="text" id="chat-input" placeholder="Спроси о месте или введи код..." style="flex:1; border:none; outline:none; font-weight:700;">
+              <input type="text" id="chat-input" placeholder="Спроси TerraBot..." style="flex:1; border:none; outline:none; font-weight:700;">
 
-              <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%;">➤</button>
+              <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; border:none; cursor:pointer;">➤</button>
 
           </div>
 
@@ -284,7 +274,7 @@
 
   <div id="main-menu" class="main-side-menu">
 
-      <h2 style="font-weight:900;">TerraLens</h2>
+      <h2 style="font-weight:900; margin-bottom:30px;">TerraLens</h2>
 
       <button class="menu-link" onclick="openModal('modal-donate')">💖 Поддержка сайта</button>
 
@@ -292,7 +282,7 @@
 
       <button class="menu-link" onclick="openModal('modal-settings')">⚙️ Настройки</button>
 
-      <button onclick="closeMenu()" style="margin-top:20px; background:none; border:none; color:#aaa; font-weight:700;">ЗАКРЫТЬ</button>
+      <button onclick="closeMenu()" style="margin-top:20px; background:none; border:none; color:#aaa; font-weight:700; cursor:pointer;">ЗАКРЫТЬ</button>
 
   </div>
 
@@ -304,15 +294,31 @@
 
   <div id="modal-donate" class="custom-modal">
 
-      <div class="bot-head floating" style="margin-bottom:15px;"><div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div></div>
+      <div class="bot-head floating" style="margin-bottom:15px;">
 
-      <h3>Поддержка</h3>
+          <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
 
-      <p style="font-size:14px; font-weight:700;">Помоги нам оплачивать ИИ!</p>
+      </div>
 
-      <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" style="background:var(--primary); color:white; display:block; padding:15px; border-radius:15px; text-decoration:none; font-weight:900;">ПОДДЕРЖАТЬ ❤️</a>
+      <h3 style="margin-bottom:10px;">Поддержка проекта</h3>
 
-      <button onclick="closeAllModals()" style="margin-top:10px; border:none; background:none; color:#aaa;">Закрыть</button>
+      <p style="font-size:14px; font-weight:700; color:#666; margin-bottom:20px;">Помоги нам развивать ИИ и оплачивать серверы!</p>
+
+      <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" style="background:var(--primary); color:white; display:block; padding:15px; border-radius:15px; text-decoration:none; font-weight:900;">ОТПРАВИТЬ ДОНАТ ❤️</a>
+
+      <button onclick="closeAllModals()" style="margin-top:15px; border:none; background:none; color:#aaa; cursor:pointer; font-weight:700;">Позже</button>
+
+  </div>
+
+
+
+  <div id="modal-settings" class="custom-modal">
+
+      <h3>Настройки</h3>
+
+      <p>Тут будут параметры интерфейса.</p>
+
+      <button onclick="closeAllModals()" class="menu-link" style="text-align:center;">ОК</button>
 
   </div>
 
@@ -324,7 +330,7 @@
 
 
 
-      // Инициализация
+      // Инициализация карты
 
       window.onload = () => {
 
@@ -332,17 +338,15 @@
 
           tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-          document.getElementById('map').style.opacity = '1';
-
           map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
 
-          addBotMsg("Привет! Я TerraBot. Нажми на любое место на карте, чтобы узнать о нем всё!");
+          addMsg("Привет! Я TerraBot. Нажми на карту или введи команду /ali09", "ai");
 
       };
 
 
 
-      // ПОИСК (с очисткой строки)
+      // ПОИСК (С очисткой)
 
       async function globalSearch() {
 
@@ -360,7 +364,7 @@
 
               fetchInfo(r[0].lat, r[0].lon);
 
-              inp.value = ''; // Очистка
+              inp.value = ''; // Очистка после поиска
 
           }
 
@@ -368,27 +372,19 @@
 
 
 
-      // ПОЛНАЯ ИНФО-КАРТА
+      // ДАННЫЕ МЕСТА (Всё на месте)
 
       async function fetchInfo(lat, lon) {
 
-          const card = document.getElementById('info-card');
-
-          card.classList.add('active');
-
-          
-
-          // 1. Геокодирование
+          document.getElementById('info-card').classList.add('active');
 
           const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
 
-          const city = geo.address.city || geo.address.town || geo.address.village || "Точка на карте";
+          const city = geo.address.city || geo.address.town || geo.address.village || "Место на карте";
 
-          const country = geo.address.country || "Нейтральные воды";
+          const country = geo.address.country || "Нейтральная зона";
 
-          const countryCode = geo.address.country_code ? geo.address.country_code.toUpperCase() : null;
-
-
+          
 
           document.getElementById('card-city').innerText = city;
 
@@ -398,7 +394,9 @@
 
 
 
-          // 2. Флаг и Валюта
+          // Флаг и Валюта
+
+          const countryCode = geo.address.country_code?.toUpperCase();
 
           if(countryCode) {
 
@@ -420,81 +418,27 @@
 
 
 
-          // 3. Погода
+          // Погода и Время
 
           const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`).then(r=>r.json());
 
           document.getElementById('card-temp').innerText = weather.current_weather.temperature + "°C";
 
-
-
-          // 4. Время
-
-          const now = new Date();
-
-          document.getElementById('card-time').innerText = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('card-time').innerText = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
 
 
 
-          // 5. Википедия
+          // Вики
 
           const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
 
-          document.getElementById('card-wiki').innerText = wiki.extract || "Детальной исторической справки в базе нет.";
+          document.getElementById('card-wiki').innerText = wiki.extract || "Информации в Википедии пока нет.";
 
       }
 
 
 
-      // МАРШРУТЫ
-
-      function buildRoute() {
-
-          if(routing) map.removeControl(routing);
-
-          const start = document.getElementById('start-inp').value;
-
-          const end = document.getElementById('end-inp').value;
-
-          
-
-          Promise.all([
-
-              fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${start}`).then(r=>r.json()),
-
-              fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${end}`).then(r=>r.json())
-
-          ]).then(res => {
-
-              if(res[0][0] && res[1][0]) {
-
-                  routing = L.Routing.control({
-
-                      waypoints: [
-
-                          L.latLng(res[0][0].lat, res[0][0].lon),
-
-                          L.latLng(res[1][0].lat, res[1][0].lon)
-
-                      ],
-
-                      lineOptions: { styles: [{ color: '#3742fa', weight: 6 }] },
-
-                      createMarker: () => null
-
-                  }).addTo(map);
-
-                  document.getElementById('route-panel').style.display = 'none';
-
-              }
-
-          });
-
-      }
-
-
-
-      // ЧАТ И КОМАНДА /ali09
+      // ЧАТ
 
       async function sendChat() {
 
@@ -512,21 +456,15 @@
 
 
 
-          // Секретная команда
-
           if(q.toLowerCase() === '/ali09') {
 
-              addBotMsg("🔓 Протокол разработчика активирован. Все системы TerraLens работают на 110%. Спасибо, что ты с нами!");
+              addMsg("🔓 Режим разработчика активен. Все системы исправны!", "ai");
 
               return;
 
           }
 
 
-
-          // Запрос к ИИ (без перемещения камеры)
-
-          document.getElementById('loader').style.display = 'block';
 
           try {
 
@@ -536,23 +474,17 @@
 
                   headers: { "Content-Type": "application/json" },
 
-                  body: JSON.stringify({ prompt: `Ты TerraBot. Кратко ответь: ${q}` })
+                  body: JSON.stringify({ prompt: `Ты TerraBot, кратко ответь: ${q}` })
 
               });
 
               const data = await res.json();
 
-              addBotMsg(data.choices[0].message.content);
+              addMsg(data.choices[0].message.content, "ai");
 
-          } catch(e) { addBotMsg("Ошибка сети. Попробуй позже!"); }
-
-          document.getElementById('loader').style.display = 'none';
+          } catch(e) { addMsg("Ошибка связи с ИИ.", "ai"); }
 
       }
-
-
-
-      function addBotMsg(text) { addMsg(text, 'ai'); }
 
 
 
@@ -568,35 +500,69 @@
 
           log.appendChild(b);
 
-          log.scrollTop = log.scrollHeight; // Авто-скролл вниз
+          log.scrollTop = log.scrollHeight; // Скролл вниз
 
       }
 
 
 
-      // UI ХЕНДЛЕРЫ
+      // ЛОГИКА ОКН (ФИКС БЛЮРА)
 
       function openMenu() { document.getElementById('main-menu').classList.add('open'); }
 
       function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
 
-      function openModal(id) { closeMenu(); document.getElementById('modal-overlay').style.display = 'block'; document.getElementById(id).style.display = 'block'; }
 
-      function closeAllModals() { document.getElementById('modal-overlay').style.display = 'none'; document.querySelectorAll('.custom-modal').forEach(m => m.style.display = 'none'); }
+
+      function openModal(id) {
+
+          closeMenu();
+
+          const overlay = document.getElementById('modal-overlay');
+
+          const modal = document.getElementById(id);
+
+          overlay.style.display = 'block';
+
+          modal.style.display = 'block';
+
+          setTimeout(() => {
+
+              overlay.classList.add('show');
+
+              modal.classList.add('show');
+
+          }, 10);
+
+      }
+
+
+
+      function closeAllModals() {
+
+          const overlay = document.getElementById('modal-overlay');
+
+          const modals = document.querySelectorAll('.custom-modal');
+
+          overlay.classList.remove('show');
+
+          modals.forEach(m => m.classList.remove('show'));
+
+          setTimeout(() => {
+
+              overlay.style.display = 'none';
+
+              modals.forEach(m => m.style.display = 'none');
+
+          }, 300);
+
+      }
+
+
 
       function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
 
       function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
-
-      function toggleRoutePanel() { 
-
-          const p = document.getElementById('route-panel');
-
-          p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-
-          document.getElementById('btn-route').classList.toggle('active');
-
-      }
 
       function setMode(m) {
 
@@ -604,7 +570,7 @@
 
           document.getElementById('btn-sat').classList.toggle('active', m==='sat');
 
-          tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+          tileLayer.setUrl(m==='sat'?'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}':'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
       }
 
