@@ -52,6 +52,8 @@
 
 
 
+      /* ЭФФЕКТЫ ПАРЕНИЯ */
+
       @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
       @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
@@ -106,7 +108,7 @@
 
       }
 
-      .menu-btn.active { background: var(--blue); color: white; box-shadow: 0 10px 20px rgba(55, 66, 250, 0.3); }
+      .menu-btn.active { background: var(--blue) !important; color: white !important; box-shadow: 0 10px 20px rgba(55, 66, 250, 0.3); }
 
 
 
@@ -134,6 +136,8 @@
 
 
 
+      /* МАСКОТ */
+
       .bot-head {
 
           width: 80px; height: 70px; background: var(--primary); border-radius: 24px;
@@ -147,16 +151,6 @@
       .bot-eye { width: 8px; height: 12px; background: #7bed9f; border-radius: 4px; box-shadow: 0 0 10px #7bed9f; animation: blink 4s infinite; }
 
        
-
-      .blush { position: absolute; bottom: 3px; width: 14px; height: 8px; display: flex; gap: 2px; opacity: 0; transition: 0.5s; }
-
-      .blush span { width: 2px; height: 100%; background: #ff4757; transform: rotate(20deg); border-radius: 5px; }
-
-      .blush.left { left: 5px; } .blush.right { right: 5px; }
-
-      .cute .blush { opacity: 0.8; }
-
-
 
       #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(241, 242, 246, 0.4); }
 
@@ -196,15 +190,9 @@
 
       }
 
-      .vote-btns { display: flex; gap: 15px; margin-top: 10px; justify-content: center; }
-
-      .vote-btns span { cursor: pointer; font-size: 24px; transition: 0.3s; }
-
-      .vote-btns span:hover { transform: scale(1.3); }
 
 
-
-      /* --- МЕНЮ И МОДАЛКИ (ФИКС) --- */
+      /* МЕНЮ И МОДАЛКИ */
 
       #menu-toggle-btn {
 
@@ -235,8 +223,6 @@
       }
 
       .main-side-menu.open { left: 0; }
-
-
 
       .menu-title { font-size: 24px; font-weight: 900; color: var(--dark); margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
 
@@ -290,19 +276,13 @@
 
       }
 
-      /* Чтобы модалки корректно показывались */
-
       .custom-modal.show { display: block !important; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
 
 
-      .btn-heart { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; flex: 1; display: inline-block; }
+      .btn-heart { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; display: inline-block; width: 100%; margin-top: 10px; }
 
       .btn-skip { background: none; border: none; color: #a4b0be; cursor: pointer; padding: 10px; font-weight: 700; }
-
-      .btn-setting { background: #f1f2f6; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; width: 100%; margin-bottom: 10px; }
-
-
 
   </style>
 
@@ -316,7 +296,7 @@
 
       <div class="welcome-card floating">
 
-          <div class="bot-head" style="width:110px; height:95px; margin: 0 auto 30px; border-radius: 30px;">
+          <div class="bot-head floating" style="width:110px; height:95px; margin: 0 auto 30px; border-radius: 30px;">
 
               <div class="bot-face" style="width:75px; height:50px;"><div class="bot-eye"></div><div class="bot-eye"></div></div>
 
@@ -354,13 +334,13 @@
 
       <div class="rating-bubble" id="rat-text">
 
-          Оцените наш сайт! Под ваше мнение мы будем улучшать и продвигать этот проект!
+          Оцените наш сайт! Мы будем улучшать проект!
 
-          <div class="vote-btns" id="vote-controls">
+          <div style="display:flex; gap:15px; margin-top:10px; justify-content:center;">
 
-              <span onclick="addVote('like')">👍</span>
+              <span style="cursor:pointer; font-size:24px;" onclick="addVote('like')">👍</span>
 
-              <span onclick="addVote('dislike')">👎</span>
+              <span style="cursor:pointer; font-size:24px;" onclick="addVote('dislike')">👎</span>
 
           </div>
 
@@ -368,15 +348,7 @@
 
       <div class="bot-head floating" id="rat-bot">
 
-          <div class="bot-face">
-
-              <div class="blush left"><span></span><span></span><span></span></div>
-
-              <div class="bot-eye"></div><div class="bot-eye"></div>
-
-              <div class="blush right"><span></span><span></span><span></span></div>
-
-          </div>
+          <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
 
       </div>
 
@@ -401,6 +373,8 @@
       <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ СПУТНИК</button>
 
       <button class="menu-btn" id="btn-route" onclick="toggleRoutePanel()">🚩 МАРШРУТЫ</button>
+
+      
 
       <div id="route-panel" class="glass-panel" style="display:none; flex-direction:column; gap:10px; padding:20px; margin-top:10px;">
 
@@ -458,17 +432,13 @@
 
       </div>
 
-      <h3>Поддержите проект</h3>
+      <h3>Поддержать проект</h3>
 
-      <p>Можете поддержать сайт копеечкой. Все средства идут на оплату сервера и API.</p>
+      <p>Средства идут на оплату API Gemini и работу серверов.</p>
 
-      <div class="modal-btns">
+      <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="btn-heart">Отправить донат ❤️</a>
 
-          <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="btn-heart">Поддержать ❤️</a>
-
-          <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
-
-      </div>
+      <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
 
   </div>
 
@@ -478,11 +448,9 @@
 
       <h3>Настройки вида</h3>
 
-      <p>Выберите версию интерфейса:</p>
+      <button class="menu-link" onclick="setView('desktop')">💻 Компьютерная версия</button>
 
-      <button class="btn-setting" onclick="setView('desktop')">💻 Компьютерная (Базовая)</button>
-
-      <button class="btn-setting" onclick="setView('mobile')">📱 Телефонная версия</button>
+      <button class="menu-link" onclick="setView('mobile')">📱 Мобильная версия</button>
 
       <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
 
@@ -492,19 +460,11 @@
 
   <div id="modal-future" class="custom-modal">
 
-      <h3>Планы на будущее</h3>
+      <h3>Планы на 2026</h3>
 
-      <ul style="text-align: left; font-weight: 700; color: #444; line-height: 1.8;">
+      <p>• Интеграция 3D зданий<br>• Голосовые ответы ИИ<br>• Оффлайн-карты</p>
 
-          <li>Новые ИИ модели (GPT-4o)</li>
-
-          <li>Голосовой поиск</li>
-
-          <li>Личный кабинет</li>
-
-      </ul>
-
-      <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
+      <button class="btn-skip" onclick="closeAllModals()">Круто!</button>
 
   </div>
 
@@ -514,37 +474,15 @@
 
       <div id="info-content">
 
-          <div style="display:flex; align-items:center; gap:20px;">
+          <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">Город</h2>
 
-              <img id="card-flag" src="" style="width:60px; border-radius:10px; display:none;">
+          <div id="card-country" style="opacity:0.6; font-weight:800; margin-bottom:15px;">Страна</div>
 
-              <div>
-
-                  <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">--</h2>
-
-                  <div id="card-country" style="opacity:0.6; font-weight:800;">--</div>
-
-              </div>
-
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:20px 0;">
-
-              <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ТЕМПЕРАТУРА</div><div id="card-temp" style="font-size:18px; font-weight:900; color:var(--primary);">--</div></div>
-
-              <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВРЕМЯ</div><div id="card-time" style="font-size:18px; font-weight:900;">--</div></div>
-
-              <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВАЛЮТА</div><div id="card-curr" style="font-size:14px; font-weight:900; color:var(--primary);">--</div></div>
-
-              <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">UTC</div><div id="card-utc" style="font-size:18px; font-weight:900;">--</div></div>
-
-          </div>
-
-          <div id="card-wiki" style="font-size:14px; color:#57606f; line-height:1.6; max-height:150px; overflow-y:auto; padding:15px; background:rgba(0,0,0,0.03); border-radius:20px;"></div>
+          <div id="card-wiki" style="font-size:14px; color:#57606f; line-height:1.6; max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.03); padding:15px; border-radius:20px;"></div>
 
       </div>
 
-      <button onclick="closeWindow('info-card')" style="width:100%; margin-top:25px; padding:15px; border-radius:20px; background:#dfe4ea; font-weight:800; color:var(--dark);">ЗАКРЫТЬ</button>
+      <button onclick="closeWindow('info-card')" style="width:100%; margin-top:20px; padding:15px; border-radius:20px; background:#dfe4ea; font-weight:800;">ЗАКРЫТЬ</button>
 
   </div>
 
@@ -560,17 +498,15 @@
 
       <div class="glass-panel" style="overflow:hidden; display:flex; flex-direction:column;">
 
-          <div style="padding:45px 20px 20px; text-align:center; font-weight:900; color:var(--primary); background:white;">TerraBot Gemini</div>
-
           <div id="chat-log"></div>
 
-          <div id="loader" class="pulse-text" style="display: none; color: var(--primary); padding: 5px 20px; font-size: 13px; font-weight: 800; text-align: center; background: white;">⚡ ТерраБот думает...</div>
+          <div id="loader" class="pulse-text" style="display: none; color: var(--primary); padding: 10px; font-weight: 800; text-align: center;">⚡ Думаю...</div>
 
-          <div style="padding:15px; background:white; display:flex; gap:10px; border-top:1px solid #f1f2f6;">
+          <div style="padding:15px; background:white; display:flex; gap:10px;">
 
-              <input type="text" id="chat-input" placeholder="Задай вопрос ИИ..." style="flex:1; border:none; outline:none; font-weight:700; font-family:inherit;">
+              <input type="text" id="chat-input" placeholder="Спроси TerraBot..." style="flex:1; border:none; outline:none; font-weight:700;">
 
-              <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; font-size:20px;">➤</button>
+              <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%;">➤</button>
 
           </div>
 
@@ -582,7 +518,7 @@
 
   <script>
 
-      // --- FIREBASE И КАРТА (БЕЗ ИЗМЕНЕНИЙ) ---
+      // FIREBASE
 
       const firebaseConfig = {
 
@@ -592,23 +528,13 @@
 
           databaseURL: "https://terralens-votes-default-rtdb.europe-west1.firebasedatabase.app",
 
-          projectId: "terralens-votes",
-
-          storageBucket: "terralens-votes.firebasestorage.app",
-
-          messagingSenderId: "306757191202",
-
-          appId: "1:306757191202:web:d9c18b023254b235bfec7b"
+          projectId: "terralens-votes"
 
       };
 
       firebase.initializeApp(firebaseConfig);
 
       const db = firebase.database();
-
-      let stats = { likes: 0, dislikes: 0 };
-
-      db.ref('votes').on('value', (s) => { if(s.exists()) stats = s.val(); });
 
 
 
@@ -636,7 +562,7 @@
 
               initMap();
 
-              typeMessage("Привет! Я TerraBot. Чем могу помочь? 🌍");
+              typeMessage("Привет! Я TerraBot — твой умный гид. Нажми на карту или спроси меня о чем угодно!");
 
           }, 800);
 
@@ -646,9 +572,27 @@
 
       function initMap() {
 
-          map = L.map('map', { center: [20, 0], zoom: 3, zoomControl: false, attributionControl: false });
+          // ВОЗВРАЩЕНЫ ГРАНИЦЫ
 
-          tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+          map = L.map('map', { 
+
+              center: [20, 0], 
+
+              zoom: 3, 
+
+              minZoom: 2,
+
+              zoomControl: false, 
+
+              attributionControl: false,
+
+              maxBounds: [[-85, -180], [85, 180]], 
+
+              maxBoundsViscosity: 1.0 
+
+          });
+
+          tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { noWrap: true }).addTo(map);
 
           map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
 
@@ -656,83 +600,55 @@
 
 
 
-      // --- ЛОГИКА МЕНЮ (ИСПРАВЛЕНА) ---
+      // ЛОГИКА ПЕРЕКЛЮЧЕНИЯ КНОПОК
 
-      function openMenu() { document.getElementById('main-menu').classList.add('open'); }
+      function setMode(m) {
 
-      function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
+          document.querySelectorAll('.side-menu-btns .menu-btn').forEach(b => b.classList.remove('active'));
 
+          if(m === 'sat') {
 
+              document.getElementById('btn-sat').classList.add('active');
 
-      function openModal(modalId) {
+              tileLayer.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
 
-          closeMenu();
+          } else {
 
-          document.getElementById('modal-overlay').classList.add('show');
+              document.getElementById('btn-map').classList.add('active');
 
-          // Сначала скрываем все модалки
+              tileLayer.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
-          document.querySelectorAll('.custom-modal').forEach(m => {
-
-              m.style.display = 'none';
-
-              m.classList.remove('show');
-
-          });
-
-          // Показываем нужную
-
-          const target = document.getElementById(modalId);
-
-          target.style.display = 'block';
-
-          setTimeout(() => target.classList.add('show'), 10);
+          }
 
       }
 
 
 
-      function closeAllModals() {
+      function toggleRoutePanel() {
 
-          document.getElementById('modal-overlay').classList.remove('show');
+          const p = document.getElementById('route-panel');
 
-          document.querySelectorAll('.custom-modal').forEach(m => {
+          const btn = document.getElementById('btn-route');
 
-              m.classList.remove('show');
+          if(p.style.display === 'flex') {
 
-              setTimeout(() => m.style.display = 'none', 300);
+              p.style.display = 'none';
 
-          });
+              btn.classList.remove('active');
 
-      }
+          } else {
 
+              p.style.display = 'flex';
 
+              btn.classList.add('active');
 
-      function setView(type) {
-
-          const v = document.querySelector("meta[name=viewport]");
-
-          v.setAttribute('content', type === 'mobile' ? 'width=device-width, initial-scale=1.0' : 'width=1200');
-
-          closeAllModals();
+          }
 
       }
 
 
 
-      // ОСТАЛЬНЫЕ ФУНКЦИИ (Поиск, Чат, Оценка)
-
-      function addVote(type) {
-
-          db.ref(type === 'like' ? 'votes/likes' : 'votes/dislikes').transaction(c => (c || 0) + 1);
-
-          document.getElementById('rat-text').innerText = "Спасибо! ❤️";
-
-          setTimeout(() => document.getElementById('rating-widget').style.opacity = '0', 2000);
-
-      }
-
-
+      // ИИ (С ПЕРСОНОЙ)
 
       async function askGemini(prompt) {
 
@@ -748,7 +664,11 @@
 
                   headers: { "Content-Type": "application/json" },
 
-                  body: JSON.stringify({ prompt: prompt })
+                  body: JSON.stringify({ 
+
+                      prompt: `Ты — TerraBot, дружелюбный и всезнающий гид-географ в приложении TerraLens. Твои ответы должны быть краткими, полезными и немного остроумными. Отвечай на вопрос: ${prompt}` 
+
+                  })
 
               });
 
@@ -758,7 +678,7 @@
 
               return data.choices[0].message.content;
 
-          } catch (e) { loader.style.display = "none"; return "Ошибка связи."; }
+          } catch (e) { loader.style.display = "none"; return "Упс! Мои нейроны запутались. Попробуй еще раз!"; }
 
       }
 
@@ -814,15 +734,71 @@
 
 
 
+      // МЕНЮ И МОДАЛКИ
+
+      function openMenu() { document.getElementById('main-menu').classList.add('open'); }
+
+      function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
+
+
+
+      function openModal(id) {
+
+          closeMenu();
+
+          document.getElementById('modal-overlay').classList.add('show');
+
+          const m = document.getElementById(id);
+
+          m.style.display = 'block';
+
+          setTimeout(() => m.classList.add('show'), 10);
+
+      }
+
+
+
+      function closeAllModals() {
+
+          document.getElementById('modal-overlay').classList.remove('show');
+
+          document.querySelectorAll('.custom-modal').forEach(m => {
+
+              m.classList.remove('show');
+
+              setTimeout(() => m.style.display = 'none', 300);
+
+          });
+
+      }
+
+
+
+      function setView(type) {
+
+          const v = document.querySelector("meta[name=viewport]");
+
+          v.setAttribute('content', type === 'mobile' ? 'width=device-width, initial-scale=1.0' : 'width=1200');
+
+          closeAllModals();
+
+      }
+
+
+
       async function fetchInfo(lat, lon) {
 
           document.getElementById('info-card').classList.add('active');
 
           const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
 
-          document.getElementById('card-city').innerText = geo.address.city || "Точка";
+          document.getElementById('card-city').innerText = geo.address.city || geo.address.town || "Интересное место";
 
           document.getElementById('card-country').innerText = geo.address.country || "";
+
+          const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(geo.address.city || geo.address.country)}`).then(r=>r.json());
+
+          document.getElementById('card-wiki').innerText = wiki.extract || "Сведений пока нет, но место отличное!";
 
       }
 
@@ -832,11 +808,7 @@
 
       function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
 
-      function setMode(m) {
-
-          tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-      }
+      
 
       async function globalSearch() {
 
@@ -848,13 +820,19 @@
 
       }
 
-      function toggleRoutePanel() { 
 
-          const p = document.getElementById('route-panel');
 
-          p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+      function addVote(type) {
+
+          db.ref('votes/' + type).transaction(c => (c || 0) + 1);
+
+          document.getElementById('rat-text').innerText = "Спасибо! ТерраБот счастлив! ❤️";
+
+          setTimeout(() => document.getElementById('rating-widget').style.opacity = '0', 2500);
 
       }
+
+
 
       document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChat(); });
 
