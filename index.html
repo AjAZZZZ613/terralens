@@ -728,17 +728,31 @@
 
 
 
- <div id="camera-wrapper">
+<div id="camera-wrapper" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:999999;">
 
-    <button id="camera-close" onclick="closeCamera()">×</button>
+    <video id="camera-feed" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
 
-    <video id="camera-feed" autoplay playsinline></video>
+    
 
-    <button id="camera-capture" onclick="captureAndRecognize()"></button>
+    <button onclick="closeCamera()" style="position:absolute; top:20px; right:20px; width:50px; height:50px; border-radius:50%; background:rgba(0,0,0,0.5); color:white; border:none; font-size:24px; cursor:pointer; z-index:1000001;">×</button>
 
-    <div id="camera-loading" style="display: none;">Анализирую...</div>
+    
 
- </div>
+    <button id="camera-capture-btn" style="position:absolute; bottom:50px; left:50%; transform:translateX(-50%); width:80px; height:80px; background:white; border:5px solid #ff4757; border-radius:50%; cursor:pointer; z-index:1000001; box-shadow: 0 0 20px rgba(0,0,0,0.5);"></button>
+
+
+
+    <div id="camera-loader" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white; background:rgba(0,0,0,0.8); padding:20px; border-radius:15px; text-align:center; z-index:1000002;">
+
+        🤖 ТерраБот думает...
+
+    </div>
+
+
+
+    <canvas id="capture-canvas" style="display:none;"></canvas>
+
+</div>
 
 
 
@@ -1112,57 +1126,109 @@
 
 
 
-async function captureAndRecognize() {
+// 1. ПЕРЕМЕННЫЕ
 
-    console.log("Кнопка нажата! Начинаю захват..."); // Проверка в консоли
+let stream = null;
+
+
+
+// 2. ОТКРЫТИЕ КАМЕРЫ
+
+async function openCamera() {
+
+    const wrapper = document.getElementById('camera-wrapper');
+
+    const video = document.getElementById('camera-feed');
 
     
+
+    try {
+
+        stream = await navigator.mediaDevices.getUserMedia({ 
+
+            video: { facingMode: "environment" } // Задняя камера телефона
+
+        });
+
+        video.srcObject = stream;
+
+        wrapper.style.display = 'block';
+
+        console.log("Камера запущена");
+
+    } catch (err) {
+
+        console.error("Ошибка камеры:", err);
+
+        alert("Не удалось включить камеру. Проверь разрешения!");
+
+    }
+
+}
+
+
+
+// 3. ЗАКРЫТИЕ КАМЕРЫ
+
+function closeCamera() {
+
+    if (stream) {
+
+        stream.getTracks().forEach(track => track.stop());
+
+    }
+
+    document.getElementById('camera-wrapper').style.display = 'none';
+
+}
+
+
+
+// 4. СЪЕМКА И РАБОТА С ИИ
+
+async function captureAndRecognize() {
+
+    console.log("Клик зафиксирован!");
 
     const video = document.getElementById('camera-feed');
 
     const canvas = document.getElementById('capture-canvas');
 
-    const loading = document.getElementById('camera-loading');
+    const loader = document.getElementById('camera-loader');
 
-    const captureBtn = document.getElementById('camera-capture');
+    const btn = document.getElementById('camera-capture-btn');
 
 
 
-    if (!video || !canvas) {
+    // Делаем снимок
 
-        console.error("Элементы камеры не найдены!");
+    canvas.width = video.videoWidth;
 
-        return;
+    canvas.height = video.videoHeight;
 
-    }
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    
+
+    // Превращаем в Base64 (картинка для ИИ)
+
+    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+
+
+
+    // Показываем загрузку, прячем кнопку
+
+    btn.style.display = 'none';
+
+    loader.style.display = 'block';
 
 
 
     try {
 
-        // Показываем загрузку
+        // Вызываем твою модель Ллама (через твой API ключ)
 
-        captureBtn.style.display = 'none';
-
-        loading.style.display = 'block';
-
-
-
-        // 1. Рисуем кадр
-
-        canvas.width = video.videoWidth;
-
-        canvas.height = video.videoHeight;
-
-        canvas.getContext('2d').drawImage(video, 0, 0);
-
-        
-
-        const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
-
-
-
-        // 2. Запрос к Llama через OpenRouter
+        // ВАЖНО: Мы шлем запрос напрямую, чтобы не менять твой chat.js
 
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
 
@@ -1170,7 +1236,7 @@ async function captureAndRecognize() {
 
             headers: {
 
-                "Authorization": `Bearer ${MY_OPENROUTER_KEY}`,
+                "Authorization": `Bearer ${MY_OPENROUTER_KEY}`, // Твой ключ из chat.js
 
                 "Content-Type": "application/json"
 
@@ -1188,7 +1254,7 @@ async function captureAndRecognize() {
 
                         "content": [
 
-                            { "type": "text", "text": "Назови только город или место на фото. Кратко." },
+                            { "type": "text", "text": "What is this place? Answer only with name and city in Russian." },
 
                             { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
 
@@ -1206,51 +1272,47 @@ async function captureAndRecognize() {
 
         const data = await response.json();
 
-        const resultText = data.choices[0].message.content.trim();
+        const placeName = data.choices[0].message.content.trim();
 
 
 
-        // 3. Отправляем в твой поиск
+        // Всё готово! Закрываем камеру и ищем место
 
-        finishRecognition(resultText);
+        closeCamera();
+
+        
+
+        // Выводим в твой чат
+
+        typeMessage(`📷 Сканер: Похоже, это **${placeName}**. Сейчас найду на карте!`);
+
+        
+
+        // Вставляем в поиск и запускаем твою функцию
+
+        const searchInput = document.getElementById('global-search');
+
+        if(searchInput) {
+
+            searchInput.value = placeName;
+
+            globalSearch(); 
+
+        }
 
 
 
     } catch (error) {
 
-        console.error("Ошибка сканера:", error);
+        console.error("Ошибка ИИ:", error);
 
-        alert("ИИ призадумался... Попробуй еще раз!");
+        alert("ИИ не смог распознать фото. Попробуй еще раз!");
 
     } finally {
 
-        captureBtn.style.display = 'block';
+        btn.style.display = 'block';
 
-        loading.style.display = 'none';
-
-    }
-
-}
-
-
-
-function finishRecognition(place) {
-
-    closeCamera();
-
-    typeMessage(`🤖 Вижу! Это похоже на: ${place}. Летим туда!`);
-
-    
-
-    // Твоя стандартная функция поиска по названию
-
-    const searchInput = document.getElementById('global-search');
-
-    if (searchInput) {
-
-        searchInput.value = place;
-
-        globalSearch(); 
+        loader.style.display = 'none';
 
     }
 
@@ -1258,81 +1320,10 @@ function finishRecognition(place) {
 
 
 
-     // Функция специально для работы с Llama Vision
+// Принудительно вешаем событие на кнопку, чтобы клик точно прошел
 
-async function askLlamaVision(prompt, base64Image) {
+document.getElementById('camera-capture-btn').addEventListener('click', captureAndRecognize);
 
-    const loader = document.getElementById("loader");
-
-    if (loader) loader.style.display = "block";
-
-
-
-    try {
-
-        // Если ты используешь OpenRouter (самый частый случай для этой модели)
-
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-
-            method: "POST",
-
-            headers: {
-
-                "Authorization": "Bearer ТВОЙ_API_KEY_OPENROUTER", // Сюда вставь ключ
-
-                "Content-Type": "application/json"
-
-            },
-
-            body: JSON.stringify({
-
-                "model": "meta-llama/llama-3.2-11b-vision-instruct", // ВОТ ТУТ ПИШЕТСЯ МОДЕЛЬ!
-
-                "messages": [
-
-                    {
-
-                        "role": "user",
-
-                        "content": [
-
-                            { "type": "text", "text": prompt },
-
-                            { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
-
-                        ]
-
-                    }
-
-                ]
-
-            })
-
-        });
-
-
-
-        const data = await response.json();
-
-        if (loader) loader.style.display = "none";
-
-        
-
-        // Достаем текст ответа
-
-        return data.choices[0].message.content;
-
-    } catch (e) {
-
-        if (loader) loader.style.display = "none";
-
-        console.error("Ошибка Vision:", e);
-
-        return "Не удалось распознать место.";
-
-    }
-
-}
 
 
 
@@ -1343,6 +1334,7 @@ async function askLlamaVision(prompt, base64Image) {
 </body>
 
 </html>
+
 
 
 
