@@ -1188,8 +1188,6 @@ function closeCamera() {
 
 async function captureAndRecognize() {
 
-    console.log("Клик зафиксирован!");
-
     const video = document.getElementById('camera-feed');
 
     const canvas = document.getElementById('capture-canvas');
@@ -1200,27 +1198,127 @@ async function captureAndRecognize() {
 
 
 
-    // Делаем снимок
+    // 1. Делаем фото чуть меньше, чтобы ИИ не "подавился"
 
-    canvas.width = video.videoWidth;
+    const context = canvas.getContext('2d');
 
-    canvas.height = video.videoHeight;
+    canvas.width = 640; // Ограничим размер для скорости
 
-    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.height = (video.videoHeight / video.videoWidth) * 640;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     
 
-    // Превращаем в Base64 (картинка для ИИ)
-
-    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+    const base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
 
 
-
-    // Показываем загрузку, прячем кнопку
 
     btn.style.display = 'none';
 
     loader.style.display = 'block';
+
+
+
+    try {
+
+        // ПРОВЕРКА: Есть ли ключ?
+
+        if (!window.MY_OPENROUTER_KEY || window.MY_OPENROUTER_KEY.includes("ТВОЙ_КЛЮЧ")) {
+
+            throw new Error("API ключ не найден или не настроен!");
+
+        }
+
+
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+
+            method: "POST",
+
+            headers: {
+
+                "Authorization": `Bearer ${window.MY_OPENROUTER_KEY}`,
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                "model": "meta-llama/llama-3.2-11b-vision-instruct",
+
+                "messages": [
+
+                    {
+
+                        "role": "user",
+
+                        "content": [
+
+                            { "type": "text", "text": "Назови только город и место на фото по-русски." },
+
+                            { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
+
+                        ]
+
+                    }
+
+                ]
+
+            })
+
+        });
+
+
+
+        const data = await response.json();
+
+        
+
+        // ПРОВЕРКА: Что ответил сервер?
+
+        if (data.error) {
+
+            throw new Error(`Ошибка API: ${data.error.message}`);
+
+        }
+
+
+
+        const placeName = data.choices[0]?.message?.content?.trim();
+
+        
+
+        if (!placeName) throw new Error("ИИ вернул пустой ответ");
+
+
+
+        closeCamera();
+
+        finishRecognition(placeName);
+
+
+
+    } catch (error) {
+
+        console.error("Full Error:", error);
+
+        closeCamera();
+
+        // ВМЕСТО ОБЫЧНОГО АЛЕРТА - ПИШЕМ ОШИБКУ В ЧАТ
+
+        typeMessage(`❌ Ошибка сканера: ${error.message}`);
+
+    } finally {
+
+        btn.style.display = 'block';
+
+        loader.style.display = 'none';
+
+    }
+
+}
 
 
 
@@ -1334,6 +1432,7 @@ document.getElementById('camera-capture-btn').addEventListener('click', captureA
 </body>
 
 </html>
+
 
 
 
