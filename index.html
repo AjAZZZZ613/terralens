@@ -1090,33 +1090,151 @@
 
 
 
-     function captureAndRecognize() {
+async function captureAndRecognize() {
 
-        document.getElementById('camera-capture').style.display = 'none';
+    const video = document.getElementById('camera-feed');
 
-        document.getElementById('camera-loading').style.display = 'block';
+    const canvas = document.getElementById('capture-canvas');
 
-        setTimeout(() => {
+    const context = canvas.getContext('2d');
 
-            closeCamera();
+    
 
-            document.getElementById('camera-capture').style.display = 'block';
+    // 1. Делаем скриншот с камеры
 
-            document.getElementById('camera-loading').style.display = 'none';
+    canvas.width = video.videoWidth;
 
-            typeMessage("📷 Сканирование завершено! Кажется, это Эйфелева башня. Переношу тебя в Париж!");
+    canvas.height = video.videoHeight;
 
-            map.flyTo([48.8584, 2.2945], 16, { animate: true, duration: 2 });
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            fetchInfo(48.8584, 2.2945);
+    
 
-            L.marker([48.8584, 2.2945]).addTo(map).bindPopup("Эйфелева башня").openPopup();
+    // 2. Кодируем в Base64
 
-            if(!document.getElementById('chat-wrapper').classList.contains('active')) toggleChat();
+    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
 
-        }, 2000);
+    
 
-     }
+    document.getElementById('camera-capture').style.display = 'none';
+
+    document.getElementById('camera-loading').style.display = 'block';
+
+
+
+    // 3. Спрашиваем Лламу!
+
+    const description = await askLlamaVision(
+
+        "Что это за достопримечательность или город на фото? Напиши только название.", 
+
+        base64Image
+
+    );
+
+
+
+    // 4. Отрабатываем результат
+
+    closeCamera();
+
+    document.getElementById('camera-capture').style.display = 'block';
+
+    document.getElementById('camera-loading').style.display = 'none';
+
+    
+
+    typeMessage(`📷 Сканер Llama: Похоже, это ${description}. Ищу на карте...`);
+
+    
+
+    // Запускаем твой поиск по названию, которое выдал ИИ
+
+    document.getElementById('global-search').value = description;
+
+    globalSearch();
+
+}
+
+
+
+     // Функция специально для работы с Llama Vision
+
+async function askLlamaVision(prompt, base64Image) {
+
+    const loader = document.getElementById("loader");
+
+    if (loader) loader.style.display = "block";
+
+
+
+    try {
+
+        // Если ты используешь OpenRouter (самый частый случай для этой модели)
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+
+            method: "POST",
+
+            headers: {
+
+                "Authorization": "Bearer ТВОЙ_API_KEY_OPENROUTER", // Сюда вставь ключ
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                "model": "meta-llama/llama-3.2-11b-vision-instruct", // ВОТ ТУТ ПИШЕТСЯ МОДЕЛЬ!
+
+                "messages": [
+
+                    {
+
+                        "role": "user",
+
+                        "content": [
+
+                            { "type": "text", "text": prompt },
+
+                            { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
+
+                        ]
+
+                    }
+
+                ]
+
+            })
+
+        });
+
+
+
+        const data = await response.json();
+
+        if (loader) loader.style.display = "none";
+
+        
+
+        // Достаем текст ответа
+
+        return data.choices[0].message.content;
+
+    } catch (e) {
+
+        if (loader) loader.style.display = "none";
+
+        console.error("Ошибка Vision:", e);
+
+        return "Не удалось распознать место.";
+
+    }
+
+}
+
+
 
  </script>
 
@@ -1125,4 +1243,5 @@
 </body>
 
 </html>
+
 
