@@ -384,6 +384,64 @@
 
         }
 
+        #camera-wrapper {
+
+    z-index: 9999; /* Чтобы камера была над картой */
+
+}
+
+
+
+#camera-capture {
+
+    position: absolute;
+
+    bottom: 30px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 70px;
+
+    height: 70px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    border: 5px solid rgba(0,0,0,0.2);
+
+    cursor: pointer;
+
+    z-index: 10000; /* Кнопка ДОЛЖНА быть выше видео */
+
+}
+
+
+
+#camera-loading {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    color: white;
+
+    background: rgba(0,0,0,0.7);
+
+    padding: 10px;
+
+    border-radius: 10px;
+
+    z-index: 10001;
+
+}
+
     </style>
 
 </head>
@@ -1050,109 +1108,153 @@
 
 
 
-     // --- НОВАЯ ЛОГИКА КАМЕРЫ ---
+// Проверь, чтобы эта переменная была ВНЕ функций, в самом начале скрипта
 
-     let cameraStream = null;
-
-
-
-     async function openCamera() {
-
-        const wrapper = document.getElementById('camera-wrapper');
-
-        const video = document.getElementById('camera-feed');
-
-        try {
-
-            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-
-            video.srcObject = cameraStream;
-
-            wrapper.classList.add('active');
-
-        } catch (err) {
-
-            alert("Нужен доступ к камере! Проверь настройки Safari.");
-
-        }
-
-     }
-
-
-
-     function closeCamera() {
-
-        document.getElementById('camera-wrapper').classList.remove('active');
-
-        if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); }
-
-     }
+const MY_OPENROUTER_KEY = ""; 
 
 
 
 async function captureAndRecognize() {
 
+    console.log("Кнопка нажата! Начинаю захват..."); // Проверка в консоли
+
+    
+
     const video = document.getElementById('camera-feed');
 
     const canvas = document.getElementById('capture-canvas');
 
-    const context = canvas.getContext('2d');
+    const loading = document.getElementById('camera-loading');
 
-    
-
-    // 1. Делаем скриншот с камеры
-
-    canvas.width = video.videoWidth;
-
-    canvas.height = video.videoHeight;
-
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    
-
-    // 2. Кодируем в Base64
-
-    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
-
-    
-
-    document.getElementById('camera-capture').style.display = 'none';
-
-    document.getElementById('camera-loading').style.display = 'block';
+    const captureBtn = document.getElementById('camera-capture');
 
 
 
-    // 3. Спрашиваем Лламу!
+    if (!video || !canvas) {
 
-    const description = await askLlamaVision(
+        console.error("Элементы камеры не найдены!");
 
-        "Что это за достопримечательность или город на фото? Напиши только название.", 
+        return;
 
-        base64Image
-
-    );
+    }
 
 
 
-    // 4. Отрабатываем результат
+    try {
+
+        // Показываем загрузку
+
+        captureBtn.style.display = 'none';
+
+        loading.style.display = 'block';
+
+
+
+        // 1. Рисуем кадр
+
+        canvas.width = video.videoWidth;
+
+        canvas.height = video.videoHeight;
+
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        
+
+        const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+
+
+
+        // 2. Запрос к Llama через OpenRouter
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+
+            method: "POST",
+
+            headers: {
+
+                "Authorization": `Bearer ${MY_OPENROUTER_KEY}`,
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                "model": "meta-llama/llama-3.2-11b-vision-instruct",
+
+                "messages": [
+
+                    {
+
+                        "role": "user",
+
+                        "content": [
+
+                            { "type": "text", "text": "Назови только город или место на фото. Кратко." },
+
+                            { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
+
+                        ]
+
+                    }
+
+                ]
+
+            })
+
+        });
+
+
+
+        const data = await response.json();
+
+        const resultText = data.choices[0].message.content.trim();
+
+
+
+        // 3. Отправляем в твой поиск
+
+        finishRecognition(resultText);
+
+
+
+    } catch (error) {
+
+        console.error("Ошибка сканера:", error);
+
+        alert("ИИ призадумался... Попробуй еще раз!");
+
+    } finally {
+
+        captureBtn.style.display = 'block';
+
+        loading.style.display = 'none';
+
+    }
+
+}
+
+
+
+function finishRecognition(place) {
 
     closeCamera();
 
-    document.getElementById('camera-capture').style.display = 'block';
-
-    document.getElementById('camera-loading').style.display = 'none';
+    typeMessage(`🤖 Вижу! Это похоже на: ${place}. Летим туда!`);
 
     
 
-    typeMessage(`📷 Сканер Llama: Похоже, это ${description}. Ищу на карте...`);
+    // Твоя стандартная функция поиска по названию
 
-    
+    const searchInput = document.getElementById('global-search');
 
-    // Запускаем твой поиск по названию, которое выдал ИИ
+    if (searchInput) {
 
-    document.getElementById('global-search').value = description;
+        searchInput.value = place;
 
-    globalSearch();
+        globalSearch(); 
+
+    }
 
 }
 
@@ -1243,5 +1345,6 @@ async function askLlamaVision(prompt, base64Image) {
 </body>
 
 </html>
+
 
 
