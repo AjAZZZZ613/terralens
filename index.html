@@ -914,57 +914,63 @@
 
 
 
-  #info-card {
+/* Внутри твоего @media (max-width: 768px) заменяй этот кусок: */
+
+#info-card {
+
+    top: auto;
+
+    bottom: 20px;
+
+    right: 0; 
+
+    left: 0;
+
+    margin: 0 auto; /* Магическое центрирование без трансформ */
+
+    width: 90%;
+
+    max-width: 400px;
+
+    box-sizing: border-box;
+
+    z-index: 2000;
+
+    
+
+    /* Оставляем только те эффекты, которые не мешают анимации .floating */
+
+    visibility: hidden;
+
+    opacity: 0;
+
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+
+    transform: none; /* Убираем конфликтующий трансформ */
+
+}
 
 
 
-      top: 140px;
+/* Когда окошко активно */
+
+#info-card.active {
+
+    visibility: visible;
+
+    opacity: 1;
+
+}
 
 
 
-      right: auto;
+/* Чтобы анимация .floating не ломала положение, добавим ей поддержку */
 
+#info-card.floating {
 
+    animation: float 4s ease-in-out infinite;
 
-      left: 50%;
-
-
-
-      transform: translateX(-50%) translateY(20px) scale(0.95); /* Сохраняем логику анимации */
-
-
-
-      width: 90%;
-
-
-
-      max-height: 50vh;
-
-
-
-      overflow-y: auto;
-
-
-
-      box-sizing: border-box;
-
-
-
-  }
-
-
-
-  #info-card.active {
-
-
-
-      transform: translateX(-50%) translateY(0) scale(1);
-
-
-
-  }
-
-
+}
 
 
 
@@ -2694,6 +2700,7 @@ window.addEventListener('DOMContentLoaded', initScrollReveal);
 
 
 </html>
+
 
 
 
