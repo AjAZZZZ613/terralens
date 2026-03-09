@@ -686,6 +686,136 @@
 
 
 
+  /* --- НОВЫЙ СТИЛЬНЫЙ ЭКРАН ПРИВЕТСТВИЯ (GLASSMORPHISM) --- */
+
+#welcome-screen {
+
+    position: fixed; inset: 0; background: #0f172a; /* Глубокий темный фон */
+
+    z-index: 9999; display: flex; flex-direction: column; 
+
+    overflow: hidden; color: white; transition: opacity 1s ease, visibility 1s;
+
+}
+
+
+
+/* Размытые пятна на фоне */
+
+.bg-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; z-index: 1; animation: floatBlob 20s infinite alternate; }
+
+.blob-blue { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3742fa; }
+
+.blob-red { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #ff4757; animation-delay: -10s; }
+
+
+
+@keyframes floatBlob {
+
+    0% { transform: translate(0, 0) scale(1); }
+
+    100% { transform: translate(15vw, 15vh) scale(1.3); }
+
+}
+
+
+
+/* Навигация вверху */
+
+.top-nav {
+
+    position: absolute; top: 0; left: 0; right: 0; padding: 30px 50px;
+
+    display: flex; justify-content: space-between; align-items: center; z-index: 10;
+
+}
+
+.logo-minimal { font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+
+
+
+/* Кнопка стекло */
+
+.glass-btn {
+
+    background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+
+    border: 1px solid rgba(255, 255, 255, 0.2); color: white;
+
+    padding: 14px 30px; border-radius: 30px; font-weight: 800; font-size: 15px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+}
+
+.glass-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+
+
+
+/* Карточка по центру */
+
+.hero-container { flex: 1; display: flex; align-items: center; justify-content: center; z-index: 10; perspective: 1000px; }
+
+.glass-hero-card {
+
+    background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px;
+
+    padding: 60px 40px; max-width: 550px; text-align: center;
+
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+
+    transform-style: preserve-3d; /* Для 3D-эффекта мыши */
+
+    transition: transform 0.1s; /* Плавность следования за мышью */
+
+}
+
+.glass-hero-card h1 { font-size: 42px; font-weight: 900; margin: 0 0 20px; background: linear-gradient(to right, #fff, #a4b0be); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.glass-hero-card p { font-size: 17px; color: #ced6e0; line-height: 1.6; font-weight: 600; margin: 0; }
+
+
+
+/* Анимация появления (всё плавно выезжает) */
+
+.reveal-item { opacity: 0; transform: translateY(40px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+.delay-1 { animation-delay: 0.2s; }
+
+.delay-2 { animation-delay: 0.4s; }
+
+.delay-3 { animation-delay: 0.6s; }
+
+.delay-4 { animation-delay: 0.8s; }
+
+
+
+@keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+
+
+
+/* Адаптация для мобильных */
+
+@media (max-width: 768px) {
+
+    .top-nav { padding: 20px; flex-direction: column; gap: 20px; }
+
+    .top-nav .logo-minimal { display: none; /* Прячем лого на телефоне, чтобы кнопка была по центру/справа */ }
+
+    .glass-btn { position: absolute; top: 20px; right: 20px; padding: 10px 20px; font-size: 13px; }
+
+    .glass-hero-card { padding: 40px 25px; width: 85%; }
+
+    .glass-hero-card h1 { font-size: 32px; }
+
+    .glass-hero-card p { font-size: 15px; }
+
+}
+
+
+
    /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (ТЕЛЕФОНЫ И ПЛАНШЕТЫ) --- */
 
 
@@ -958,59 +1088,50 @@
 
 
 
- <div id="welcome-screen">
+  <div id="welcome-screen">
+
+     <div class="bg-blob blob-blue"></div>
+
+     <div class="bg-blob blob-red"></div>
 
 
 
-     <div class="welcome-card floating">
+     <div class="top-nav reveal-item delay-1">
 
+         <div class="logo-minimal">TerraLens</div>
 
-
-         <div class="bot-head" style="width:110px; height:95px; margin: 0 auto 30px; border-radius: 30px;">
-
-
-
-             <div class="bot-face" style="width:75px; height:50px;"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-
-
-
-         </div>
-
-
-
-         <h1 style="font-weight:900; font-size: 38px; color: var(--dark); margin: 0;">TerraLens AI</h1>
-
-
-
-         <p style="color: #747d8c; font-weight: 600; font-size: 16px; line-height: 1.6; margin: 20px 0 35px;">
-
-
-
-             Привет! Я TerraLens. Со мной ты найдешь гору информации с помощью передового ИИ.
-
-
-
-         </p>
-
-
-
-         <button onclick="startApp()" style="background: var(--primary); color: white; padding: 18px 45px; border-radius: 50px; font-weight: 900; font-size: 18px;">
-
-
-
-             НАЧАТЬ ПУТЕШЕСТВИЕ
-
-
-
-         </button>
-
-
+         <button class="glass-btn" onclick="startApp()">Начать работу ✨</button>
 
      </div>
 
 
 
+     <div class="hero-container" id="parallax-area">
+
+         <div class="glass-hero-card" id="3d-card">
+
+             <div class="bot-head floating reveal-item delay-2" style="margin: 0 auto 20px; border-radius: 20px; width: 80px; height: 65px; border: none; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); box-shadow: inset 0 0 20px rgba(255,255,255,0.5);">
+
+                 <div class="bot-face" style="width: 50px; height: 30px;"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+
+             </div>
+
+             
+
+             <h1 class="reveal-item delay-3">Твой умный гид по миру</h1>
+
+             <p class="reveal-item delay-4">
+
+                 Исследуй планету через интерактивную карту. Узнавай погоду, точное время и исторические факты о любой точке Земли за пару кликов.
+
+             </p>
+
+         </div>
+
+     </div>
+
  </div>
+
 
 
 
@@ -2298,6 +2419,56 @@
 
 
 
+
+      // 3D Параллакс-эффект для приветственного экрана
+
+ const welcomeScreen = document.getElementById('welcome-screen');
+
+ const card3D = document.getElementById('3d-card');
+
+
+
+ if (welcomeScreen && card3D) {
+
+     welcomeScreen.addEventListener('mousemove', (e) => {
+
+         // Вычисляем позицию мыши от центра экрана
+
+         let xAxis = (window.innerWidth / 2 - e.pageX) / 25; 
+
+         let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+
+         card3D.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+
+     });
+
+
+
+     // Возвращаем на место, если мышь ушла
+
+     welcomeScreen.addEventListener('mouseleave', () => {
+
+         card3D.style.transition = 'all 0.5s ease';
+
+         card3D.style.transform = `rotateY(0deg) rotateX(0deg)`;
+
+     });
+
+
+
+     // Убираем transition при движении для моментальной реакции
+
+     welcomeScreen.addEventListener('mouseenter', () => {
+
+         card3D.style.transition = 'none';
+
+     });
+
+ }
+
+
+
+
  </script>
 
 
@@ -2311,4 +2482,5 @@
 
 
 </html>
+
 
