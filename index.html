@@ -2122,107 +2122,136 @@
 
 
 
-    async function fetchInfo(lat, lon) {
+async function fetchInfo(lat, lon) {
+
+    const infoCard = document.getElementById('info-card');
+
+    infoCard.classList.add('active');
 
 
 
-        document.getElementById('info-card').classList.add('active');
+    // Очищаем старые данные перед загрузкой, чтобы не путаться
+
+    document.getElementById('card-city').innerText = "Загрузка...";
+
+    document.getElementById('card-wiki').innerText = "Ищу информацию...";
 
 
 
-        try {
+    try {
+
+        // 1. Геокодирование (Город и страна)
+
+        const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r => r.json());
+
+        
+
+        // Проверяем разные поля адреса, так как в разных странах они называются по-разному
+
+        const city = geo.address.city || geo.address.town || geo.address.village || geo.address.state || "Интересное место";
+
+        const country = geo.address.country || "";
+
+        const countryCode = geo.address.country_code?.toUpperCase();
 
 
 
-            const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
+        document.getElementById('card-city').innerText = city;
+
+        document.getElementById('card-country').innerText = country;
 
 
 
-            const city = geo.address.city || geo.address.town || geo.address.state || "Точка";
+        // 2. Флаг и валюта
+
+        if (countryCode) {
+
+            document.getElementById('card-flag').src = `https://flagsapi.com/${countryCode}/flat/64.png`;
+
+            document.getElementById('card-flag').style.display = 'block';
+
+            
+
+            fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`)
+
+                .then(r => r.json())
+
+                .then(cData => {
+
+                    if (cData[0]?.currencies) {
+
+                        const cur = Object.keys(cData[0].currencies)[0];
+
+                        document.getElementById('card-curr').innerText = `${cur} (${cData[0].currencies[cur].symbol})`;
+
+                    }
+
+                }).catch(() => {});
+
+        }
 
 
 
-            document.getElementById('card-city').innerText = city;
+        // 3. Погода и время (ИСПРАВЛЕННАЯ ССЫЛКА)
+
+        // Здесь был баг: "¤t_weather" вместо "&current_weather"
+
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
+
+        const w = await fetch(weatherUrl).then(r => r.json());
 
 
 
-            document.getElementById('card-country').innerText = geo.address.country || "";
-
-
-
-            const code = geo.address.country_code?.toUpperCase();
-
-
-
-            if(code) {
-
-
-
-                document.getElementById('card-flag').src = `https://flagsapi.com/${code}/flat/64.png`;
-
-
-
-                document.getElementById('card-flag').style.display = 'block';
-
-
-
-                const cData = await fetch(`https://restcountries.com/v3.1/alpha/${code}`).then(r=>r.json());
-
-
-
-                if(cData[0].currencies) {
-
-
-
-                    const cur = Object.keys(cData[0].currencies)[0];
-
-
-
-                    document.getElementById('card-curr').innerText = `${cur} (${cData[0].currencies[cur].symbol})`;
-
-
-
-                }
-
-
-
-            }
-
-
-
-            const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}¤t_weather=true&timezone=auto`).then(r=>r.json());
-
-
+        if (w.current_weather) {
 
             document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
 
+            
 
+            // Расчет часового пояса
 
-            document.getElementById('card-utc').innerText = "UTC" + (w.utc_offset_seconds/3600 >= 0 ? "+" : "") + (w.utc_offset_seconds/3600);
+            const offset = w.utc_offset_seconds / 3600;
 
-
-
-            const time = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (w.utc_offset_seconds * 1000));
-
-
-
-            document.getElementById('card-time').innerText = time.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('card-utc').innerText = "UTC" + (offset >= 0 ? "+" : "") + offset;
 
 
 
-            const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
+            // Расчет локального времени
+
+            const localTime = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (w.utc_offset_seconds * 1000));
+
+            document.getElementById('card-time').innerText = localTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+        }
 
 
 
-            document.getElementById('card-wiki').innerText = wiki.extract || "Детальной справки нет.";
+        // 4. Википедия
+
+        // Добавил проверку: если город "Интересное место", ищем по стране или просто по координатам
+
+        const wikiSearchTerm = city !== "Интересное место" ? city : country;
+
+        const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiSearchTerm)}`).then(r => r.json());
+
+        
+
+        document.getElementById('card-wiki').innerText = wiki.extract || "Детальной справки для этого места пока нет, но оно точно заслуживает внимания!";
 
 
 
-        } catch(e) {}
+    } catch (e) {
 
+        console.error("Ошибка загрузки данных:", e);
 
+        document.getElementById('card-city').innerText = "Ошибка";
+
+        document.getElementById('card-wiki').innerText = "Не удалось загрузить данные. Проверьте интернет или попробуйте другую точку.";
 
     }
+
+}
+
 
 
 
@@ -2665,6 +2694,7 @@ window.addEventListener('DOMContentLoaded', initScrollReveal);
 
 
 </html>
+
 
 
 
