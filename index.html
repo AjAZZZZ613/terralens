@@ -1,2486 +1,838 @@
 <!DOCTYPE html>
 
-
-
 <html lang="ru">
-
-
 
 <head>
 
+    <meta charset="UTF-8">
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<link rel="apple-touch-icon" href="icon.png">
+    <title>TerraLens AI | Gemini Edition</title>
 
 
 
-<link rel="apple-touch-icon-precomposed" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
 
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <meta name="theme-color" content="#ff4d4d">
 
+    <link rel="shortcut icon" type="image/png" href="icon.png">
 
 
 
-<meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
-<meta name="mobile-web-app-capable" content="yes">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 
 
+    <style>
 
+        :root {
 
-<meta name="apple-mobile-web-app-title" content="TerraLens">
+            --primary: #ff4757;  
 
+            --blue: #3742fa;
 
+            --dark: #2f3542;
 
-<meta name="application-name" content="TerraLens">
+            --bg: #f1f2f6;
 
+            --text: #2f3542;
 
+            --glass: rgba(255, 255, 255, 0.9);
 
+            --card-bg: rgba(255, 255, 255, 0.8);
 
+            --shadow: 0 20px 40px rgba(0,0,0,0.12);
 
+            --nav-bg: rgba(255, 255, 255, 0.85);
 
+        }
 
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 
+        [data-theme="dark"] {
 
+            --bg: #0f172a;
 
+            --text: #ffffff;
 
+            --glass: rgba(30, 41, 59, 0.9);
 
+            --card-bg: rgba(30, 41, 59, 0.7);
 
-<meta name="theme-color" content="#ff4d4d">
+            --nav-bg: rgba(15, 23, 42, 0.9);
 
+        }
 
 
 
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); transition: background 0.5s, color 0.5s; }
 
+        
 
+        /* Карта скрыта по умолчанию */
 
-<link rel="shortcut icon" type="image/png" href="icon.png">
+        #map { width: 100vw; height: 100vh; z-index: 0; opacity: 0; transition: opacity 1s ease; position: fixed; inset: 0; }
 
+        .ui-element { opacity: 0; transition: 1s; pointer-events: none; }
 
+        .ui-element.show { opacity: 1; pointer-events: auto; }
 
 
 
+        /* --- LANDING PAGE (WELCOME SCREEN) --- */
 
+        #welcome-page {
 
+            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
 
+            overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;
 
+        }
 
 
- <meta charset="UTF-8">
 
+        .landing-nav {
 
+            position: fixed; top: 0; width: 100%; padding: 15px 50px; 
 
- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            display: flex; justify-content: space-between; align-items: center;
 
+            background: var(--nav-bg); backdrop-filter: blur(15px); z-index: 1000; box-sizing: border-box;
 
+            border-bottom: 1px solid rgba(128,128,128,0.1);
 
- <title>TerraLens AI | Gemini Edition</title>
+        }
 
 
 
-   
+        .nav-controls { display: flex; gap: 15px; align-items: center; }
 
+        .nav-btn { 
 
+            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2); 
 
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            padding: 8px 15px; border-radius: 12px; cursor: pointer; color: var(--text); font-weight: 800; font-size: 16px;
 
+        }
 
 
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+        .start-btn-top { background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 50px; font-weight: 900; cursor: pointer; }
 
 
- <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
+        /* Sections */
 
+        .hero-section { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; box-sizing: border-box; }
 
- <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+        .glass-card { 
 
+            background: var(--card-bg); backdrop-filter: blur(20px); 
 
+            padding: 50px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
 
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+            text-align: center; max-width: 600px; z-index: 10; box-shadow: var(--shadow);
 
+        }
 
+        .hero-section h1 { font-size: clamp(24px, 5vw, 42px); font-weight: 900; margin-bottom: 20px; }
 
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 
+        .landing-section { padding: 100px 20px; text-align: center; max-width: 1000px; margin: 0 auto; }
 
+        .landing-section h2 { font-size: 32px; font-weight: 900; margin-bottom: 50px; color: var(--primary); }
 
 
 
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
 
- <style>
+        .s-card { background: var(--card-bg); padding: 40px; border-radius: 30px; box-shadow: var(--shadow); border: 1px solid rgba(128,128,128,0.1); }
 
+        .s-card h3 { font-size: 40px; margin: 0 0 15px; }
 
 
-     :root {
 
+        /* Timeline */
 
+        .timeline { position: relative; margin-top: 50px; display: flex; flex-direction: column; gap: 40px; align-items: center; }
 
-         --primary: #ff4757;  
+        .t-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--primary); opacity: 0.3; transform: translateX(-50%); }
 
+        .t-step { position: relative; z-index: 2; display: flex; align-items: center; gap: 25px; width: 100%; max-width: 500px; text-align: left; background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); }
 
+        .t-dot { min-width: 45px; height: 45px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; }
 
-         --blue: #3742fa;
 
 
+        /* FAQ */
 
-         --dark: #2f3542;
+        .faq-container { max-width: 700px; margin: 0 auto; text-align: left; }
 
+        .faq-item { background: var(--card-bg); margin-bottom: 15px; border-radius: 20px; padding: 25px; cursor: pointer; transition: 0.3s; }
 
+        .faq-item:hover { transform: translateX(10px); }
 
-         --glass: rgba(255, 255, 255, 0.98);
+        .faq-q { font-weight: 900; font-size: 18px; color: var(--primary); }
 
+        .faq-a { margin-top: 10px; font-size: 15px; opacity: 0.8; line-height: 1.6; }
 
 
-         --shadow: 0 20px 40px rgba(0,0,0,0.12);
 
+        /* Blobs */
 
+        .bg-blobs { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
 
-     }
+        .blob { position: absolute; width: 45vw; height: 45vw; filter: blur(100px); opacity: 0.3; border-radius: 50%; animation: floatBlob 20s infinite alternate; }
 
+        .b1 { background: var(--primary); top: -10%; left: -10%; }
 
+        .b2 { background: var(--blue); bottom: -10%; right: -10%; animation-delay: -10s; }
 
+        @keyframes floatBlob { to { transform: translate(10vw, 10vh) scale(1.2); } }
 
 
 
+        /* Animations */
 
-     body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; overflow: hidden; background: #f1f2f6; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
+        .floating { animation: float 4s ease-in-out infinite; }
 
 
-     #map { width: 100vw; height: 100vh; z-index: 0; opacity: 0; transition: opacity 1.5s ease; background: #a8edea; }
 
+        /* --- UI ELEMENTS (MAP OVERLAYS) --- */
 
+        .search-wrapper { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; background: var(--glass); padding: 8px; border-radius: 50px; box-shadow: var(--shadow); }
 
-     .leaflet-routing-container { display: none !important; }
+        .search-input { border: none; background: transparent; padding: 0 20px; width: 300px; font-weight: 700; font-size: 16px; outline: none; color: var(--text); }
 
+        .side-menu-btns { position: absolute; top: 100px; left: 25px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
 
+        .glass-panel { background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.2); color: var(--text); }
 
+        .menu-btn { background: var(--glass); padding: 14px 22px; border-radius: 20px; font-weight: 800; color: var(--text); border: 1px solid rgba(128,128,128,0.1); cursor: pointer; }
 
+        .menu-btn.active { background: var(--blue); color: white; }
 
 
 
-     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        #info-card { position: absolute; top: 25px; right: 25px; width: 340px; z-index: 1001; padding: 30px; }
 
+        #chat-wrapper { position: absolute; bottom: 25px; left: 25px; width: 360px; z-index: 1001; }
 
 
-     @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
 
+        .bot-head { width: 80px; height: 70px; background: var(--primary); border-radius: 24px; border: 4px solid #fff; position: relative; display: flex; justify-content: center; align-items: center; }
 
+        .bot-face { width: 55px; height: 35px; background: #2f3542; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; }
 
-     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        .bot-eye { width: 8px; height: 12px; background: #7bed9f; border-radius: 4px; box-shadow: 0 0 10px #7bed9f; }
 
 
 
-       
+        #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 
+        .bubble { padding: 14px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; max-width: 85%; }
 
+        .ai-msg { background: rgba(128,128,128,0.1); align-self: flex-start; }
 
-     .floating { animation: float 4s ease-in-out infinite; }
+        .user-msg { background: var(--blue); color: white; align-self: flex-end; }
 
 
 
-     .pulse-text { animation: pulse 1.5s infinite; }
+        #rating-widget { position: absolute; bottom: 25px; right: 25px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 
 
 
+        .main-side-menu { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: var(--bg); box-shadow: 5px 0 30px rgba(0,0,0,0.15); z-index: 11000; transition: 0.4s; padding: 25px; }
 
+        .main-side-menu.open { left: 0; }
 
+        
 
+        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: var(--bg); padding: 30px; border-radius: 25px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 12001; display: none; opacity: 0; transition: 0.3s; }
 
-     .window {
+        .custom-modal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); display: block; }
 
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 12000; display: none; }
 
 
-         opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95);
 
+        @media (max-width: 768px) {
 
+            .landing-nav { padding: 10px 20px; }
 
-         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;
+            .logo-text { display: none; }
 
+            .hero-section h1 { font-size: 28px; }
 
+            .side-menu-btns { top: auto; bottom: 100px; left: 10px; flex-direction: row; flex-wrap: wrap; }
 
-     }
+            #info-card, #chat-wrapper { width: 90%; left: 50%; transform: translateX(-50%); }
 
+            .search-wrapper { width: 80%; top: 80px; }
 
+        }
 
-     .window.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
-
-
-
-
-
-
-
-     #welcome-screen {
-
-
-
-         position: fixed; inset: 0; background: radial-gradient(circle at center, #ffffff 0%, #dfe4ea 100%);
-
-
-
-         z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.8s;
-
-
-
-     }
-
-
-
-     .welcome-card { text-align: center; background: white; padding: 50px; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); max-width: 450px; }
-
-
-
-
-
-
-
-     button { border: none; outline: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
-
-
-
-     button:hover { transform: scale(1.06); filter: brightness(1.05); }
-
-
-
-     button:active { transform: scale(0.96); }
-
-
-
-
-
-
-
-     .menu-btn {  
-
-
-
-         background: var(--glass); padding: 14px 22px; border-radius: 20px; font-weight: 800; color: var(--dark);
-
-
-
-         display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.5);
-
-
-
-     }
-
-
-
-     .menu-btn.active { background: var(--blue); color: white; box-shadow: 0 10px 20px rgba(55, 66, 250, 0.3); }
-
-
-
-
-
-
-
-     .search-wrapper {
-
-
-
-         position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
-
-
-
-         z-index: 1000; display: flex; background: var(--glass); padding: 8px; border-radius: 50px; box-shadow: var(--shadow);
-
-
-
-     }
-
-
-
-     .search-input { border: none; background: transparent; padding: 0 20px; width: 300px; font-weight: 700; font-size: 16px; outline: none; }
-
-
-
-
-
-
-
-     .side-menu-btns { position: absolute; top: 100px; left: 25px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-
-
-
-     .glass-panel { background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: var(--shadow); border: 1px solid white; }
-
-
-
-
-
-
-
-     #info-card { position: absolute; top: 25px; right: 25px; width: 340px; z-index: 1001; padding: 30px; }
-
-
-
-     #chat-wrapper { position: absolute; bottom: 25px; left: 25px; width: 360px; z-index: 1001; }
-
-
-
-
-
-
-
-     .bot-head {
-
-
-
-         width: 80px; height: 70px; background: var(--primary); border-radius: 24px;
-
-
-
-         border: 4px solid #fff; position: relative; display: flex; justify-content: center; align-items: center;
-
-
-
-     }
-
-
-
-     .bot-face { width: 55px; height: 35px; background: #2f3542; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; overflow: hidden; }
-
-
-
-     .bot-eye { width: 8px; height: 12px; background: #7bed9f; border-radius: 4px; box-shadow: 0 0 10px #7bed9f; animation: blink 4s infinite; }
-
-
-
-       
-
-
-
-     .blush { position: absolute; bottom: 3px; width: 14px; height: 8px; display: flex; gap: 2px; opacity: 0; transition: 0.5s; }
-
-
-
-     .blush span { width: 2px; height: 100%; background: #ff4757; transform: rotate(20deg); border-radius: 5px; }
-
-
-
-     .blush.left { left: 5px; } .blush.right { right: 5px; }
-
-
-
-     .cute .blush { opacity: 0.8; }
-
-
-
-
-
-
-
-     #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(241, 242, 246, 0.4); }
-
-
-
-     .bubble { padding: 14px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; max-width: 85%; line-height: 1.5; }
-
-
-
-     .ai-msg { background: white; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-
-
-
-     .user-msg { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-
-
-
-     .typing::after { content: '|'; animation: blink 0.8s infinite; }
-
-
-
-
-
-
-
-     #rating-widget {
-
-
-
-         position: absolute; bottom: 25px; right: 25px; z-index: 1000;
-
-
-
-         display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
-
-
-
-     }
-
-
-
-     .rating-bubble {
-
-
-
-         background: white; padding: 15px 20px; border-radius: 25px; box-shadow: var(--shadow);
-
-
-
-         max-width: 220px; font-size: 13px; font-weight: 800; color: var(--dark);
-
-
-
-         position: relative; margin-bottom: 5px; transform-origin: bottom right; transition: 0.5s;
-
-
-
-     }
-
-
-
-     .rating-bubble::after {
-
-
-
-         content: ''; position: absolute; bottom: -8px; right: 30px;
-
-
-
-         border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white;
-
-
-
-     }
-
-
-
-     .vote-btns { display: flex; gap: 15px; margin-top: 10px; justify-content: center; }
-
-
-
-     .vote-btns span { cursor: pointer; font-size: 24px; transition: 0.3s; }
-
-
-
-     .vote-btns span:hover { transform: scale(1.3); }
-
-
-
-
-
-
-
-     #menu-toggle-btn {
-
-
-
-         position: absolute; top: 25px; left: 25px;
-
-
-
-         background: #fff; border: 2px solid #eee; padding: 12px 18px;
-
-
-
-         border-radius: 20px; cursor: pointer; font-weight: 800; font-size: 14px;
-
-
-
-         color: var(--dark); z-index: 1500; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-
-
-
-         transition: 0.2s; display: flex; align-items: center; gap: 8px;
-
-
-
-     }
-
-
-
-     #menu-toggle-btn:hover { background: #f9f9f9; transform: scale(1.05); }
-
-
-
-
-
-
-
-     .main-side-menu {
-
-
-
-         position: fixed; top: 0; left: -320px; width: 280px; height: 100vh;
-
-
-
-         background: #ffffff; box-shadow: 5px 0 30px rgba(0,0,0,0.15);
-
-
-
-         z-index: 2000; transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-
-
-
-         padding: 25px; display: flex; flex-direction: column;
-
-
-
-     }
-
-
-
-     .main-side-menu.open { left: 0; }
-
-
-
-
-
-
-
-     .close-menu-btn { align-self: flex-end; background: none; border: none; font-size: 24px; cursor: pointer; color: #888; }
-
-
-
-     .menu-title { font-size: 24px; font-weight: 900; color: var(--dark); margin-bottom: 30px; border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; }
-
-
-
-
-
-
-
-     .menu-links button, .menu-link {
-
-
-
-         display: block; width: 100%; text-align: left; background: #fdfdfd; border: 1px solid #f1f2f6;
-
-
-
-         padding: 16px; margin-bottom: 12px; border-radius: 15px; font-size: 15px; font-weight: 700;
-
-
-
-         color: #444; text-decoration: none; cursor: pointer; transition: 0.2s;
-
-
-
-     }
-
-
-
-     .menu-links button:hover, .menu-link:hover { background: #f0f8ff; transform: translateX(5px); border-color: var(--blue); }
-
-
-
-
-
-
-
-     .modal-overlay {
-
-
-
-         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-
-
-
-         background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
-
-
-
-         z-index: 3000; display: none; opacity: 0; transition: opacity 0.3s;
-
-
-
-     }
-
-
-
-     .modal-overlay.show { opacity: 1; }
-
-
-
-
-
-
-
-     .custom-modal {
-
-
-
-         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-
-
-
-         background: white; padding: 30px; border-radius: 25px;
-
-
-
-         width: 90%; max-width: 360px; text-align: center;
-
-
-
-         box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-
-
-
-         z-index: 3001; display: none; opacity: 0;
-
-
-
-         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-
-
-
-     }
-
-
-
-     .custom-modal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-
-
-     .custom-modal h3 { margin-top: 0; color: var(--dark); font-weight: 900; font-size: 22px; }
-
-
-
-     .custom-modal p { color: #57606f; font-weight: 600; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
-
-
-
-
-
-
-
-     .modal-btns { display: flex; gap: 10px; justify-content: center; }
-
-
-
-     .btn-heart { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; flex: 1; transition: 0.2s; }
-
-
-
-     .btn-heart:hover { background: #e83e3e; transform: scale(1.05); }
-
-
-
-     .btn-skip { background: none; border: none; color: #a4b0be; cursor: pointer; padding: 10px; font-weight: 700; font-size: 14px; }
-
-
-
-     .btn-skip:hover { color: #57606f; }
-
-
-
-     .btn-setting { background: #f1f2f6; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; color: var(--dark); transition: 0.2s; }
-
-
-
-     .btn-setting:hover { background: #dfe4ea; }
-
-
-
-  /* --- НОВЫЙ СТИЛЬНЫЙ ЭКРАН ПРИВЕТСТВИЯ (GLASSMORPHISM) --- */
-
-#welcome-screen {
-
-    position: fixed; inset: 0; background: #0f172a; /* Глубокий темный фон */
-
-    z-index: 9999; display: flex; flex-direction: column; 
-
-    overflow: hidden; color: white; transition: opacity 1s ease, visibility 1s;
-
-}
-
-
-
-/* Размытые пятна на фоне */
-
-.bg-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; z-index: 1; animation: floatBlob 20s infinite alternate; }
-
-.blob-blue { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3742fa; }
-
-.blob-red { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #ff4757; animation-delay: -10s; }
-
-
-
-@keyframes floatBlob {
-
-    0% { transform: translate(0, 0) scale(1); }
-
-    100% { transform: translate(15vw, 15vh) scale(1.3); }
-
-}
-
-
-
-/* Навигация вверху */
-
-.top-nav {
-
-    position: absolute; top: 0; left: 0; right: 0; padding: 30px 50px;
-
-    display: flex; justify-content: space-between; align-items: center; z-index: 10;
-
-}
-
-.logo-minimal { font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
-
-
-
-/* Кнопка стекло */
-
-.glass-btn {
-
-    background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-
-    border: 1px solid rgba(255, 255, 255, 0.2); color: white;
-
-    padding: 14px 30px; border-radius: 30px; font-weight: 800; font-size: 15px;
-
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-}
-
-.glass-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
-
-
-
-/* Карточка по центру */
-
-.hero-container { flex: 1; display: flex; align-items: center; justify-content: center; z-index: 10; perspective: 1000px; }
-
-.glass-hero-card {
-
-    background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-
-    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px;
-
-    padding: 60px 40px; max-width: 550px; text-align: center;
-
-    box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-
-    transform-style: preserve-3d; /* Для 3D-эффекта мыши */
-
-    transition: transform 0.1s; /* Плавность следования за мышью */
-
-}
-
-.glass-hero-card h1 { font-size: 42px; font-weight: 900; margin: 0 0 20px; background: linear-gradient(to right, #fff, #a4b0be); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-.glass-hero-card p { font-size: 17px; color: #ced6e0; line-height: 1.6; font-weight: 600; margin: 0; }
-
-
-
-/* Анимация появления (всё плавно выезжает) */
-
-.reveal-item { opacity: 0; transform: translateY(40px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-.delay-1 { animation-delay: 0.2s; }
-
-.delay-2 { animation-delay: 0.4s; }
-
-.delay-3 { animation-delay: 0.6s; }
-
-.delay-4 { animation-delay: 0.8s; }
-
-
-
-@keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
-
-
-
-/* Адаптация для мобильных */
-
-@media (max-width: 768px) {
-
-    .top-nav { padding: 20px; flex-direction: column; gap: 20px; }
-
-    .top-nav .logo-minimal { display: none; /* Прячем лого на телефоне, чтобы кнопка была по центру/справа */ }
-
-    .glass-btn { position: absolute; top: 20px; right: 20px; padding: 10px 20px; font-size: 13px; }
-
-    .glass-hero-card { padding: 40px 25px; width: 85%; }
-
-    .glass-hero-card h1 { font-size: 32px; }
-
-    .glass-hero-card p { font-size: 15px; }
-
-}
-
-
-
-   /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (ТЕЛЕФОНЫ И ПЛАНШЕТЫ) --- */
-
-
-
-@media (max-width: 768px) {
-
-
-
-   /* 1. Поиск: делаем по центру, но чуть ниже, чтобы не наезжал на кнопку меню */
-
-
-
-   .search-wrapper {
-
-
-
-       top: 80px;
-
-
-
-       width: 90%;
-
-
-
-       max-width: 350px;
-
-
-
-       box-sizing: border-box;
-
-
-
-   }
-
-
-
-   .search-input { width: 100%; font-size: 14px; padding: 0 10px; }
-
-
-
-
-
-
-
-   /* 2. Кнопки (Карта, Спутник, AI): превращаем в нижнюю панель навигации (как в приложениях) */
-
-
-
-   .side-menu-btns {
-
-
-
-       top: auto;
-
-
-
-       bottom: 15px;
-
-
-
-       left: 50%;
-
-
-
-       transform: translateX(-50%);
-
-
-
-       flex-direction: row;
-
-
-
-       width: 95%;
-
-
-
-       justify-content: center;
-
-
-
-       flex-wrap: wrap; /* Если не влезет, перенесется на новую строку */
-
-
-
-       gap: 8px;
-
-
-
-   }
-
-
-
-   .menu-btn { padding: 10px 15px; font-size: 12px; }
-
-
-
-
-
-
-
-   /* 3. Окна (Чат и Инфо-карточка): расширяем почти на весь экран */
-
-
-
-   #info-card {
-
-
-
-       top: 140px;
-
-
-
-       right: auto;
-
-
-
-       left: 50%;
-
-
-
-       transform: translateX(-50%) translateY(20px) scale(0.95); /* Сохраняем логику анимации */
-
-
-
-       width: 90%;
-
-
-
-       max-height: 50vh;
-
-
-
-       overflow-y: auto;
-
-
-
-       box-sizing: border-box;
-
-
-
-   }
-
-
-
-   #info-card.active {
-
-
-
-       transform: translateX(-50%) translateY(0) scale(1);
-
-
-
-   }
-
-
-
-
-
-
-
-   #chat-wrapper {
-
-
-
-       bottom: 80px; /* Поднимаем над нижним меню кнопок */
-
-
-
-       left: 50%;
-
-
-
-       transform: translateX(-50%) translateY(20px) scale(0.95);
-
-
-
-       width: 90%;
-
-
-
-       box-sizing: border-box;
-
-
-
-   }
-
-
-
-   #chat-wrapper.active {
-
-
-
-       transform: translateX(-50%) translateY(0) scale(1);
-
-
-
-   }
-
-
-
-
-
-
-
-   /* 4. Приветственный экран: уменьшаем шрифты, чтобы влезало */
-
-
-
-   .welcome-card { padding: 30px 20px; width: 85%; }
-
-
-
-   .welcome-card h1 { font-size: 28px !important; }
-
-
-
-   .welcome-card p { font-size: 14px !important; }
-
-
-
-
-
-
-
-   /* 5. Виджет оценки: прячем или делаем компактным, чтобы не мешал */
-
-
-
-   #rating-widget {
-
-
-
-       bottom: 80px;
-
-
-
-       right: 15px;
-
-
-
-       transform: scale(0.8);
-
-
-
-       transform-origin: bottom right;
-
-
-
-   }
-
-
-
-}
-
-
-
- </style>
-
-
+    </style>
 
 </head>
-
-
 
 <body>
 
 
 
+<div id="welcome-page">
 
+    <nav class="landing-nav">
 
+        <div class="logo-text" style="font-weight: 900; font-size: 22px; letter-spacing: 1px;">TerraLens</div>
 
+        <div class="nav-controls">
 
-  <div id="welcome-screen">
+            <button id="theme-toggle" class="nav-btn" onclick="toggleTheme()">🌙</button>
 
-     <div class="bg-blob blob-blue"></div>
+            <button id="lang-toggle" class="nav-btn" onclick="toggleLang()">RU</button>
 
-     <div class="bg-blob blob-red"></div>
+            <button class="start-btn-top" onclick="startApp()" data-ru="Начать работу ✨" data-en="Get Started ✨">Начать работу ✨</button>
 
+        </div>
 
+    </nav>
 
-     <div class="top-nav reveal-item delay-1">
 
-         <div class="logo-minimal">TerraLens</div>
 
-         <button class="glass-btn" onclick="startApp()">Начать работу ✨</button>
+    <section class="hero-section">
 
-     </div>
+        <div class="bg-blobs">
 
+            <div class="blob b1"></div>
 
+            <div class="blob b2"></div>
 
-     <div class="hero-container" id="parallax-area">
+        </div>
 
-         <div class="glass-hero-card" id="3d-card">
+        <div class="glass-card">
 
-             <div class="bot-head floating reveal-item delay-2" style="margin: 0 auto 20px; border-radius: 20px; width: 80px; height: 65px; border: none; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); box-shadow: inset 0 0 20px rgba(255,255,255,0.5);">
+            <div class="bot-head floating" style="margin: 0 auto 20px; border-radius: 20px;">
 
-                 <div class="bot-face" style="width: 50px; height: 30px;"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+                <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
 
-             </div>
+            </div>
 
-             
+            <h1 data-ru="Твой умный гид по миру" data-en="Your Smart World Guide">Твой умный гид по миру</h1>
 
-             <h1 class="reveal-item delay-3">Твой умный гид по миру</h1>
+            <p style="font-size: 18px; opacity: 0.8; font-weight: 600;" data-ru="Исследуй планету, узнавай факты и общайся с ИИ на интерактивной карте." data-en="Explore the planet, learn facts, and chat with AI on an interactive map.">
 
-             <p class="reveal-item delay-4">
+                Исследуй планету, узнавай факты и общайся с ИИ на интерактивной карте.
 
-                 Исследуй планету через интерактивную карту. Узнавай погоду, точное время и исторические факты о любой точке Земли за пару кликов.
+            </p>
 
-             </p>
+            <button class="start-btn-top" style="margin-top: 30px; padding: 15px 40px; font-size: 18px;" onclick="startApp()" data-ru="Открыть карту" data-en="Open Map">Открыть карту</button>
 
-         </div>
+        </div>
 
-     </div>
+    </section>
 
- </div>
 
 
+    <section class="landing-section">
 
+        <h2 data-ru="Наши услуги" data-en="Our Services">Наши услуги</h2>
 
+        <div class="services-grid">
 
+            <div class="s-card">
 
+                <h3>🌍</h3>
 
+                <h4 data-ru="Интерактивность" data-en="Interactivity">Интерактивность</h4>
 
- <div id="map"></div>
+                <p data-ru="Нажимай на любую точку мира и получай мгновенную информацию." data-en="Click anywhere in the world to get instant information.">Нажимай на любую точку мира и получай мгновенную информацию.</p>
 
+            </div>
 
+            <div class="s-card">
 
+                <h3>🤖</h3>
 
+                <h4 data-ru="ИИ Помощник" data-en="AI Assistant">ИИ Помощник</h4>
 
+                <p data-ru="TerraBot на базе Gemini ответит на любые географические вопросы." data-en="TerraBot powered by Gemini will answer any geographic questions.">TerraBot на базе Gemini ответит на любые географические вопросы.</p>
 
+            </div>
 
- <button id="menu-toggle-btn" class="ui-element" style="opacity:0;" onclick="openMenu()">☰ МЕНЮ</button>
+            <div class="s-card">
 
+                <h3>📊</h3>
 
+                <h4 data-ru="Точные данные" data-en="Live Data">Точные данные</h4>
 
+                <p data-ru="Погода, время, валюта и история мест в реальном времени." data-en="Weather, time, currency and history of places in real time.">Погода, время, валюта и история мест в реальном времени.</p>
 
+            </div>
 
+        </div>
 
+    </section>
 
- <div id="rating-widget" style="opacity:0; transition: 1s;">
 
 
+    <section class="landing-section">
 
-     <div class="rating-bubble" id="rat-text">
+        <h2 data-ru="Как мы работаем" data-en="How We Work">Как мы работаем</h2>
 
+        <div class="timeline">
 
+            <div class="t-line"></div>
 
-         Оцените наш сайт! Под ваше мнение мы будем улучшать и продвигать этот проект!
+            <div class="t-step">
 
+                <div class="t-dot">1</div>
 
+                <p data-ru="Услышать мнение клиентов" data-en="Listen to customers">Услышать мнение клиентов</p>
 
-         <div class="vote-btns" id="vote-controls">
+            </div>
 
+            <div class="t-step">
 
+                <div class="t-dot">2</div>
 
-             <span onclick="addVote('like')">👍</span>
+                <p data-ru="Пишем код и дорабатываем идеи" data-en="Coding and ideas">Пишем код и дорабатываем свои идеи</p>
 
+            </div>
 
+            <div class="t-step">
 
-             <span onclick="addVote('dislike')">👎</span>
+                <div class="t-dot">3</div>
 
+                <p data-ru="Даем попробовать тестировщикам" data-en="Beta testing">Даем попробовать тестировщикам</p>
 
+            </div>
 
-         </div>
+            <div class="t-step">
 
+                <div class="t-dot">4</div>
 
+                <p data-ru="Публикуем обновление" data-en="Publish update">Публикуем обновление</p>
 
-     </div>
+            </div>
 
+        </div>
 
+    </section>
 
-     <div class="bot-head floating" id="rat-bot">
 
 
+    <section class="landing-section">
 
-          <div class="bot-face">
+        <h2 data-ru="Частые вопросы" data-en="FAQ">Частые вопросы</h2>
 
+        <div class="faq-container">
 
+            <div class="faq-item">
 
-             <div class="blush left"><span></span><span></span><span></span></div>
+                <div class="faq-q" data-ru="Это бесплатно?" data-en="Is it free?">Это бесплатно?</div>
 
+                <div class="faq-a" data-ru="Да! Все основные функции поиска и общения с ИИ доступны бесплатно." data-en="Yes! All core search and AI chat features are available for free.">Да! Все основные функции поиска и общения с ИИ доступны бесплатно.</div>
 
+            </div>
 
-             <div class="bot-eye"></div><div class="bot-eye"></div>
+            <div class="faq-item">
 
+                <div class="faq-q" data-ru="Как работает ИИ?" data-en="How does AI work?">Как работает ИИ?</div>
 
+                <div class="faq-a" data-ru="Мы используем API Google Gemini для обработки ваших запросов о мире." data-en="We use Google Gemini API to process your queries about the world.">Мы используем API Google Gemini для обработки ваших запросов о мире.</div>
 
-             <div class="blush right"><span></span><span></span><span></span></div>
+            </div>
 
+        </div>
 
+    </section>
 
-         </div>
+</div>
 
 
 
-     </div>
+<div id="map"></div>
 
 
 
- </div>
+<button id="menu-toggle-btn" class="ui-element" onclick="openMenu()">☰ МЕНЮ</button>
 
 
 
+<div class="ui-element search-wrapper" id="ui-search">
 
+    <input type="text" class="search-input" id="global-search" placeholder="Куда отправимся?">
 
+    <button onclick="globalSearch()" style="background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 900; border:none; cursor:pointer;">ПОИСК</button>
 
+</div>
 
- <div class="ui-element search-wrapper" id="ui-search" style="opacity:0;">
 
 
+<div class="ui-element side-menu-btns" id="ui-menu">
 
-     <input type="text" class="search-input" id="global-search" placeholder="Куда отправимся?">
+    <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ КАРТА</button>
 
+    <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ СПУТНИК</button>
 
+    <button class="menu-btn" style="background:var(--primary); color:white;" onclick="toggleChat()">🤖 AI TERRABOT</button>
 
-     <button onclick="globalSearch()" style="background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 900;">ПОИСК</button>
+</div>
 
 
 
- </div>
+<div id="info-card" class="glass-panel window floating">
 
+    <div id="info-content">
 
+        <div style="display:flex; align-items:center; gap:20px;">
 
+            <img id="card-flag" src="" style="width:60px; border-radius:10px; display:none;">
 
+            <div>
 
+                <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">--</h2>
 
+                <div id="card-country" style="opacity:0.6; font-weight:800;">--</div>
 
- <div class="ui-element side-menu-btns" id="ui-menu" style="opacity:0;">
+            </div>
 
+        </div>
 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:20px 0;">
 
-     <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ КАРТА</button>
+            <div><div style="font-size:11px; font-weight:800; color:var(--primary);">ТЕМПЕРАТУРА</div><div id="card-temp" style="font-size:18px; font-weight:900;">--</div></div>
 
+            <div style="text-align:right;"><div style="font-size:11px; font-weight:800; opacity:0.6;">ВРЕМЯ</div><div id="card-time" style="font-size:18px; font-weight:900;">--</div></div>
 
+        </div>
 
-     <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ СПУТНИК</button>
+        <div id="card-wiki" style="font-size:14px; line-height:1.6; max-height:150px; overflow-y:auto; padding:15px; background:rgba(0,0,0,0.05); border-radius:20px;"></div>
 
+    </div>
 
+    <button onclick="closeWindow('info-card')" style="width:100%; margin-top:25px; padding:15px; border-radius:20px; background:rgba(128,128,128,0.2); font-weight:800; color:var(--text); border:none; cursor:pointer;">ЗАКРЫТЬ</button>
 
-     <button class="menu-btn" id="btn-route" onclick="toggleRoutePanel()">🚩 МАРШРУТЫ</button>
+</div>
 
 
 
-     <div id="route-panel" class="glass-panel" style="display:none; flex-direction:column; gap:10px; padding:20px; margin-top:10px;">
+<div id="chat-wrapper" class="window">
 
+    <div class="glass-panel" style="overflow:hidden; display:flex; flex-direction:column;">
 
+        <div style="padding:20px; text-align:center; font-weight:900; color:var(--primary); background:var(--card-bg);">TerraBot Gemini</div>
 
-         <input type="text" id="start-inp" placeholder="Точка А" style="padding:12px; border-radius:15px; border:1px solid #eee;">
+        <div id="chat-log"></div>
 
+        <div style="padding:15px; background:var(--card-bg); display:flex; gap:10px; border-top:1px solid rgba(128,128,128,0.1);">
 
+            <input type="text" id="chat-input" placeholder="Спроси меня..." style="flex:1; border:none; outline:none; font-weight:700; background:transparent; color:var(--text);">
 
-         <input type="text" id="end-inp" placeholder="Точка Б" style="padding:12px; border-radius:15px; border:1px solid #eee;">
+            <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; border:none; cursor:pointer;">➤</button>
 
+        </div>
 
+    </div>
 
-         <div style="display:flex; gap:10px;">
+</div>
 
 
 
-             <button onclick="buildRoute()" style="flex:1; background:var(--blue); color:white; padding:12px; border-radius:15px; font-weight:900;">ПУТЬ</button>
+<div id="main-menu" class="main-side-menu">
 
+    <button onclick="closeMenu()" style="float:right; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text);">✖</button>
 
+    <div style="font-size: 24px; font-weight: 900; margin-bottom: 30px;">TerraLens</div>
 
-             <button onclick="clearRoute()" class="menu-btn" style="padding:12px;">✖</button>
+    <button class="menu-btn" style="width:100%; margin-bottom:10px; text-align:left;" onclick="openModal('modal-donate')">💖 Поддержка</button>
 
+    <button class="menu-btn" style="width:100%; margin-bottom:10px; text-align:left;" onclick="openModal('modal-settings')">⚙️ Настройки</button>
 
+</div>
 
-         </div>
 
 
+<div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
 
-     </div>
+<div id="modal-donate" class="custom-modal">
 
+    <h3>Поддержать проект</h3>
 
+    <p>Все средства идут на развитие ИИ и серверов.</p>
 
-     <button class="menu-btn" style="background:var(--primary); color:white;" onclick="toggleChat()">🤖 AI TERRABOT</button>
+    <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="start-btn-top" style="display:inline-block; text-decoration:none;">Поддержать ❤️</a>
 
+</div>
 
 
- </div>
 
+<div id="modal-settings" class="custom-modal">
 
+    <h3>Настройки</h3>
 
+    <p>Выберите режим отображения:</p>
 
+    <button class="menu-btn" style="width:100%; margin-bottom:10px;" onclick="setView('desktop')">💻 Десктоп</button>
 
+    <button class="menu-btn" style="width:100%;" onclick="setView('mobile')">📱 Мобильная</button>
 
+</div>
 
- <div id="info-card" class="glass-panel window floating">
 
 
+<script>
 
-     <div id="info-content">
+    const firebaseConfig = {
 
+        apiKey: "AIzaSyAYSeXH7-5Y6iEVO0uPWiVeeICyImayWn4",
 
+        authDomain: "terralens-votes.firebaseapp.com",
 
-         <div style="display:flex; align-items:center; gap:20px;">
+        databaseURL: "https://terralens-votes-default-rtdb.europe-west1.firebasedatabase.app",
 
+        projectId: "terralens-votes",
 
+        storageBucket: "terralens-votes.firebasestorage.app",
 
-             <img id="card-flag" src="" style="width:60px; border-radius:10px; display:none;">
+        messagingSenderId: "306757191202",
 
+        appId: "1:306757191202:web:d9c18b023254b235bfec7b"
 
+    };
 
-             <div>
+    firebase.initializeApp(firebaseConfig);
 
+    const db = firebase.database();
 
 
-                 <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">--</h2>
 
+    let map, tileLayer, currentLang = 'RU';
 
 
-                 <div id="card-country" style="opacity:0.6; font-weight:800;">--</div>
 
+    function toggleTheme() {
 
+        const body = document.documentElement;
 
-             </div>
+        const btn = document.getElementById('theme-toggle');
 
+        if (body.getAttribute('data-theme') === 'dark') {
 
+            body.removeAttribute('data-theme');
 
-         </div>
+            btn.innerText = '🌙';
 
+        } else {
 
+            body.setAttribute('data-theme', 'dark');
 
-         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:20px 0;">
+            btn.innerText = '☀️';
 
+        }
 
+    }
 
-             <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ТЕМПЕРАТУРА</div><div id="card-temp" style="font-size:18px; font-weight:900; color:var(--primary);">--</div></div>
 
 
+    function toggleLang() {
 
-             <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВРЕМЯ</div><div id="card-time" style="font-size:18px; font-weight:900;">--</div></div>
+        currentLang = currentLang === 'RU' ? 'EN' : 'RU';
 
+        document.getElementById('lang-toggle').innerText = currentLang;
 
+        document.querySelectorAll('[data-ru]').forEach(el => {
 
-             <div><div style="font-size:11px; font-weight:800; color:#a4b0be;">ВАЛЮТА</div><div id="card-curr" style="font-size:14px; font-weight:900; color:var(--primary);">--</div></div>
+            el.innerText = el.getAttribute(`data-${currentLang.toLowerCase()}`);
 
+        });
 
+        document.getElementById('global-search').placeholder = currentLang === 'RU' ? 'Куда отправимся?' : 'Where to go?';
 
-             <div style="text-align:right;"><div style="font-size:11px; font-weight:800; color:#a4b0be;">UTC</div><div id="card-utc" style="font-size:18px; font-weight:900;">--</div></div>
+    }
 
 
 
-         </div>
+    function startApp() {
 
+        const page = document.getElementById('welcome-page');
 
+        page.style.transition = '1s';
 
-         <div id="card-wiki" style="font-size:14px; color:#57606f; line-height:1.6; max-height:150px; overflow-y:auto; padding:15px; background:rgba(0,0,0,0.03); border-radius:20px;"></div>
+        page.style.opacity = '0';
 
+        page.style.pointerEvents = 'none';
 
+        
 
-     </div>
+        setTimeout(() => {
 
+            page.style.display = 'none';
 
+            document.getElementById('map').style.opacity = '1';
 
-     <button onclick="closeWindow('info-card')" style="width:100%; margin-top:25px; padding:15px; border-radius:20px; background:#dfe4ea; font-weight:800; color:var(--dark);">ЗАКРЫТЬ</button>
+            document.querySelectorAll('.ui-element').forEach(el => el.classList.add('show'));
 
+            initMap();
 
+        }, 1000);
 
- </div>
+    }
 
 
 
+    function initMap() {
 
+        if (map) return;
 
+        map = L.map('map', { center: [20, 0], zoom: 3, zoomControl: false, attributionControl: false });
 
+        tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
- <div id="chat-wrapper" class="window">
+        map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
 
+    }
 
 
-     <div class="bot-head floating" style="margin-bottom: -15px; margin-left: 30px; z-index:10;">
 
+    function setMode(m) {
 
+        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
 
-         <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+        document.getElementById(m === 'sat' ? 'btn-sat' : 'btn-map').classList.add('active');
 
+        tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
+    }
 
-     </div>
 
 
+    async function fetchInfo(lat, lon) {
 
-     <div class="glass-panel" style="overflow:hidden; display:flex; flex-direction:column;">
+        document.getElementById('info-card').classList.add('active');
 
+        try {
 
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${currentLang.toLowerCase()}`).then(r=>r.json());
 
-         <div style="padding:45px 20px 20px; text-align:center; font-weight:900; color:var(--primary); background:white;">TerraBot Gemini</div>
+            const city = res.address.city || res.address.town || res.address.state || "Место";
 
+            document.getElementById('card-city').innerText = city;
 
+            document.getElementById('card-country').innerText = res.address.country || "";
 
-         <div id="chat-log"></div>
+            
 
+            const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`).then(r=>r.json());
 
+            document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
 
-         <div id="loader" class="pulse-text" style="display: none; color: var(--primary); padding: 5px 20px; font-size: 13px; font-weight: 800; text-align: center; background: white;">
+            document.getElementById('card-time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
+            
 
+            const wiki = await fetch(`https://${currentLang.toLowerCase()}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
 
-              ⚡ ТерраБот думает...
+            document.getElementById('card-wiki').innerText = wiki.extract || (currentLang === 'RU' ? "Нет описания." : "No description.");
 
+        } catch(e) {}
 
+    }
 
-         </div>
 
 
+    async function globalSearch() {
 
-         <div style="padding:15px; background:white; display:flex; gap:10px; border-top:1px solid #f1f2f6;">
+        const q = document.getElementById('global-search').value;
 
+        if(!q) return;
 
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(res => res.json());
 
-             <input type="text" id="chat-input" placeholder="Задай вопрос ИИ..." style="flex:1; border:none; outline:none; font-weight:700; font-family:inherit;">
+        if(r[0]) {
 
+            map.flyTo([r[0].lat, r[0].lon], 10);
 
+            fetchInfo(r[0].lat, r[0].lon);
 
-             <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; font-size:20px;">➤</button>
+        }
 
+    }
 
 
-         </div>
 
+    function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
 
+    function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
 
-     </div>
+    function openMenu() { document.getElementById('main-menu').classList.add('open'); }
 
+    function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
 
+    function openModal(id) { closeMenu(); document.getElementById('modal-overlay').style.display = 'block'; document.getElementById(id).classList.add('show'); }
 
- </div>
+    function closeAllModals() { document.getElementById('modal-overlay').style.display = 'none'; document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('show')); }
 
 
 
+    function sendChat() {
 
+        const input = document.getElementById('chat-input'), log = document.getElementById('chat-log');
 
+        if (!input.value.trim()) return;
 
+        log.innerHTML += `<div class="bubble user-msg">${input.value}</div>`;
 
- <div id="main-menu" class="main-side-menu">
+        const q = input.value;
 
+        input.value = '';
 
+        setTimeout(() => {
 
-     <button class="close-menu-btn" onclick="closeMenu()">✖</button>
+            log.innerHTML += `<div class="bubble ai-msg">Я изучаю информацию о "${q}"...</div>`;
 
+            log.scrollTop = log.scrollHeight;
 
+        }, 500);
 
-     <div class="menu-title">TerraLens</div>
+    }
 
 
 
-     <div class="menu-links">
+    function setView(type) {
 
+        let meta = document.querySelector("meta[name=viewport]");
 
+        meta.setAttribute('content', type === 'mobile' ? 'width=device-width, initial-scale=1.0' : 'width=1200');
 
-         <button onclick="openModal('modal-donate')">💖 1. Поддержка сайта</button>
+        closeAllModals();
 
+    }
 
-
-         <a href="https://t.me/terralensed" target="_blank" class="menu-link">✈️ 2. Тг канал сайта</a>
-
-
-
-         <button onclick="openModal('modal-settings')">⚙️ 3. Настройки</button>
-
-
-
-         <button onclick="openModal('modal-future')">🚀 4. Будущее сайта</button>
-
-
-
-     </div>
-
-
-
- </div>
-
-
-
-
-
-
-
- <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
-
-
-
-
-
-
-
- <div id="modal-donate" class="custom-modal">
-
-
-
-     <div class="bot-head floating" style="margin: 0 auto 15px; transform: scale(0.8);">
-
-
-
-         <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-
-
-
-     </div>
-
-
-
-     <h3>Поддержите проект</h3>
-
-
-
-     <p>Можете поддержать сайт копеечкой. Все средства идут на оплату сервера и API.</p>
-
-
-
-     <div class="modal-btns">
-
-
-
-         <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="btn-heart" onclick="closeAllModals()">Поддержать ❤️</a>
-
-
-
-         <button class="btn-skip" onclick="closeAllModals()">Воздержаться</button>
-
-
-
-     </div>
-
-
-
- </div>
-
-
-
-
-
-
-
- <div id="modal-settings" class="custom-modal">
-
-
-
-     <h3>Настройки вида</h3>
-
-
-
-     <p>Выберите, как отображать сайт:</p>
-
-
-
-     <div class="modal-btns" style="flex-direction: column;">
-
-
-
-         <button class="btn-setting" onclick="setView('desktop')">💻 Компьютерная (Базовая)</button>
-
-
-
-         <button class="btn-setting" onclick="setView('mobile')">📱 Телефонная версия</button>
-
-
-
-     </div>
-
-
-
-     <button class="btn-skip" onclick="closeAllModals()" style="margin-top: 15px;">Закрыть</button>
-
-
-
- </div>
-
-
-
-
-
-
-
- <div id="modal-future" class="custom-modal">
-
-
-
-     <h3>Планы на будущее</h3>
-
-
-
-     <ul style="text-align: left; font-size: 15px; font-weight: 600; color: #57606f; margin-bottom: 25px; line-height: 1.6;">
-
-
-
-         <li>Внедрение новых ИИ моделей</li>
-
-
-
-         <li>Голосовое общение с маскотом</li>
-
-
-
-         <li>Личные аккаунты пользователей</li>
-
-
-
-     </ul>
-
-
-
-     <button class="btn-skip" onclick="closeAllModals()">Закрыть</button>
-
-
-
- </div>
-
-
-
-
-
-
-
- <script>
-
-
-
-     const firebaseConfig = {
-
-
-
-         apiKey: "AIzaSyAYSeXH7-5Y6iEVO0uPWiVeeICyImayWn4",
-
-
-
-         authDomain: "terralens-votes.firebaseapp.com",
-
-
-
-         databaseURL: "https://terralens-votes-default-rtdb.europe-west1.firebasedatabase.app",
-
-
-
-         projectId: "terralens-votes",
-
-
-
-         storageBucket: "terralens-votes.firebasestorage.app",
-
-
-
-         messagingSenderId: "306757191202",
-
-
-
-         appId: "1:306757191202:web:d9c18b023254b235bfec7b"
-
-
-
-     };
-
-
-
-     firebase.initializeApp(firebaseConfig);
-
-
-
-     const db = firebase.database();
-
-
-
-     let stats = { likes: 0, dislikes: 0 };
-
-
-
-     db.ref('votes').on('value', (s) => { if(s.exists()) stats = s.val(); });
-
-
-
-
-
-
-
-     let map, tileLayer, routingControl;
-
-
-
-
-
-
-
-     function startApp() {
-
-
-
-         document.getElementById('welcome-screen').style.opacity = '0';
-
-
-
-         setTimeout(() => {
-
-
-
-             document.getElementById('welcome-screen').style.display = 'none';
-
-
-
-             document.getElementById('map').style.opacity = '1';
-
-
-
-             document.getElementById('ui-search').style.opacity = '1';
-
-
-
-             document.getElementById('ui-menu').style.opacity = '1';
-
-
-
-             document.getElementById('rating-widget').style.opacity = '1';
-
-
-
-             document.getElementById('menu-toggle-btn').style.opacity = '1';
-
-
-
-             initMap();
-
-
-
-             typeMessage("Привет! Я TerraBot, усиленный интеллектом Gemini. Спрашивай о чем угодно! 🌍");
-
-
-
-         }, 800);
-
-
-
-     }
-
-
-
-
-
-
-
-     function initMap() {
-
-
-
-         map = L.map('map', {  
-
-
-
-             center: [20, 0], zoom: 3, minZoom: 2, zoomControl: false, attributionControl: false,
-
-
-
-             maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1.0
-
-
-
-         });
-
-
-
-         tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { noWrap: true }).addTo(map);
-
-
-
-         map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
-
-
-
-     }
-
-
-
-
-
-
-
-     function addVote(type) {
-
-
-
-         db.ref(type === 'like' ? 'votes/likes' : 'votes/dislikes').transaction(c => (c || 0) + 1);
-
-
-
-         document.getElementById('vote-controls').style.display = 'none';
-
-
-
-         document.getElementById('rat-text').innerText = "Спасибо за ваше мнение! ❤️";
-
-
-
-         document.getElementById('rat-bot').classList.add('cute');
-
-
-
-         setTimeout(() => { document.getElementById('rating-widget').style.opacity = '0'; }, 3000);
-
-
-
-     }
-
-
-
-
-
-
-
-     async function askGemini(prompt) {
-
-
-
-          const loader = document.getElementById("loader");
-
-
-
-          if (loader) loader.style.display = "block";  
-
-
-
-          try {
-
-
-
-              const response = await fetch("/api/chat", {
-
-
-
-                  method: "POST", headers: { "Content-Type": "application/json" },
-
-
-
-                  body: JSON.stringify({ prompt: prompt })
-
-
-
-              });
-
-
-
-              const data = await response.json();
-
-
-
-              if (loader) loader.style.display = "none";  
-
-
-
-              return (response.ok && data.choices) ? data.choices[0].message.content : "[Ошибка]: Попробуй позже.";
-
-
-
-          } catch (e) {
-
-
-
-              if (loader) loader.style.display = "none";
-
-
-
-              return "[Ошибка сети].";
-
-
-
-          }
-
-
-
-     }
-
-
-
-
-
-
-
-     async function sendChat() {
-
-
-
-         const input = document.getElementById('chat-input'), log = document.getElementById('chat-log');
-
-
-
-         const q = input.value.trim();
-
-
-
-         if(!q) return;
-
-
-
-         log.innerHTML += `<div class="bubble user-msg">${q}</div>`;
-
-
-
-         input.value = '';
-
-
-
-         log.scrollTop = log.scrollHeight;
-
-
-
-         if(q === '/ali09') { typeMessage(`🛠 ADMIN\n👍 Likes: ${stats.likes}\n👎 Dislikes: ${stats.dislikes}`); return; }
-
-
-
-         let aiResponse = await askGemini(`Ты гид-географ TerraBot. Кратко ответь: ${q}`);
-
-
-
-         try {
-
-
-
-             const wikiSearch = await fetch(`https://ru.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=1&format=json&origin=*`).then(r=>r.json());
-
-
-
-             let searchName = (wikiSearch[1] && wikiSearch[1][0]) ? wikiSearch[1][0] : q;
-
-
-
-             const search = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchName)}&limit=1&accept-language=ru`).then(r=>r.json());
-
-
-
-             if(search[0]) { map.flyTo([search[0].lat, search[0].lon], 9); fetchInfo(search[0].lat, search[0].lon); }
-
-
-
-             typeMessage(aiResponse || "Не могу найти это.");
-
-
-
-         } catch(e) { typeMessage("Упс, ошибка!"); }
-
-
-
-     }
-
-
-
-
-
-
-
-     function typeMessage(text) {
-
-
-
-         const log = document.getElementById('chat-log'), bubble = document.createElement('div');
-
-
-
-         bubble.className = 'bubble ai-msg typing';
-
-
-
-         log.appendChild(bubble);
-
-
-
-         let i = 0;
-
-
-
-         function type() {
-
-
-
-             if (i < text.length) {
-
-
-
-                 bubble.innerHTML += text.charAt(i); i++; log.scrollTop = log.scrollHeight; setTimeout(type, 15);
-
-
-
-             } else { bubble.classList.remove('typing'); }
-
-
-
-         }
-
-
-
-         type();
-
-
-
-     }
-
-
-
-
-
-
-
-     async function fetchInfo(lat, lon) {
-
-
-
-         document.getElementById('info-card').classList.add('active');
-
-
-
-         try {
-
-
-
-             const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
-
-
-
-             const city = geo.address.city || geo.address.town || geo.address.state || "Точка";
-
-
-
-             document.getElementById('card-city').innerText = city;
-
-
-
-             document.getElementById('card-country').innerText = geo.address.country || "";
-
-
-
-             const code = geo.address.country_code?.toUpperCase();
-
-
-
-             if(code) {
-
-
-
-                 document.getElementById('card-flag').src = `https://flagsapi.com/${code}/flat/64.png`;
-
-
-
-                 document.getElementById('card-flag').style.display = 'block';
-
-
-
-                 const cData = await fetch(`https://restcountries.com/v3.1/alpha/${code}`).then(r=>r.json());
-
-
-
-                 if(cData[0].currencies) {
-
-
-
-                     const cur = Object.keys(cData[0].currencies)[0];
-
-
-
-                     document.getElementById('card-curr').innerText = `${cur} (${cData[0].currencies[cur].symbol})`;
-
-
-
-                 }
-
-
-
-             }
-
-
-
-             const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`).then(r=>r.json());
-
-
-
-             document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
-
-
-
-             document.getElementById('card-utc').innerText = "UTC" + (w.utc_offset_seconds/3600 >= 0 ? "+" : "") + (w.utc_offset_seconds/3600);
-
-
-
-             const time = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (w.utc_offset_seconds * 1000));
-
-
-
-             document.getElementById('card-time').innerText = time.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-
-
-
-             const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
-
-
-
-             document.getElementById('card-wiki').innerText = wiki.extract || "Детальной справки нет.";
-
-
-
-         } catch(e) {}
-
-
-
-     }
-
-
-
-
-
-
-
-     function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
-
-
-
-     function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
-
-
-
-     function setMode(m) {
-
-
-
-         document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-
-
-
-         document.getElementById(m === 'sat' ? 'btn-sat' : 'btn-map').classList.add('active');
-
-
-
-         tileLayer.setUrl(m === 'sat' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-
-
-     }
-
-
-
-
-
-
-
-     async function globalSearch() {
-
-
-
-         const q = document.getElementById('global-search').value;
-
-
-
-         if(!q) return;
-
-
-
-         const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(res => res.json());
-
-
-
-         if(r[0]) { map.flyTo([r[0].lat, r[0].lon], 10); fetchInfo(r[0].lat, r[0].lon); }
-
-
-
-         document.getElementById('global-search').value = '';  
-
-
-
-     }
-
-
-
-
-
-
-
-     function toggleRoutePanel() { document.getElementById('route-panel').style.display = (document.getElementById('route-panel').style.display === 'flex' ? 'none' : 'flex'); }
-
-
-
-     async function buildRoute() {
-
-
-
-         const s = document.getElementById('start-inp').value, e = document.getElementById('end-inp').value;
-
-
-
-         const r1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${s}&limit=1`).then(r=>r.json());
-
-
-
-         const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e}&limit=1`).then(r=>r.json());
-
-
-
-         if(r1[0] && r2[0]) {
-
-
-
-             if(routingControl) map.removeControl(routingControl);
-
-
-
-             routingControl = L.Routing.control({
-
-
-
-                 waypoints: [L.latLng(parseFloat(r1[0].lat), parseFloat(r1[0].lon)), L.latLng(parseFloat(r2[0].lat), parseFloat(r2[0].lon))],
-
-
-
-                 lineOptions: { styles: [{ color: '#3742fa', weight: 6, opacity: 0.8 }] },
-
-
-
-                 createMarker: () => null, show: false
-
-
-
-             }).addTo(map);
-
-
-
-         }
-
-
-
-     }
-
-
-
-     function clearRoute() { if(routingControl) map.removeControl(routingControl); document.getElementById('start-inp').value = ''; document.getElementById('end-inp').value = ''; }
-
-
-
-     document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChat(); });
-
-
-
-
-
-
-
-     // --- ИСПРАВЛЕННАЯ ЛОГИКА МЕНЮ И МОДАЛОК ---
-
-
-
-     function openMenu() { document.getElementById('main-menu').classList.add('open'); }
-
-
-
-     function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
-
-
-
-
-
-
-
-     function openModal(modalId) {
-
-
-
-         closeMenu();
-
-
-
-         const overlay = document.getElementById('modal-overlay');
-
-
-
-         const modal = document.getElementById(modalId);
-
-
-
-         
-
-
-
-         overlay.style.display = 'block';
-
-
-
-         modal.style.display = 'block';
-
-
-
-         
-
-
-
-         // Небольшая задержка, чтобы браузер успел отрисовать display:block перед началом анимации
-
-
-
-         setTimeout(() => {
-
-
-
-             overlay.classList.add('show');
-
-
-
-             modal.classList.add('show');
-
-
-
-         }, 10);
-
-
-
-     }
-
-
-
-
-
-
-
-     function closeAllModals() {
-
-
-
-         const overlay = document.getElementById('modal-overlay');
-
-
-
-         const modals = document.querySelectorAll('.custom-modal');
-
-
-
-         
-
-
-
-         overlay.classList.remove('show');
-
-
-
-         modals.forEach(m => m.classList.remove('show'));
-
-
-
-         
-
-
-
-         setTimeout(() => {
-
-
-
-             overlay.style.display = 'none';
-
-
-
-             modals.forEach(m => m.style.display = 'none');
-
-
-
-         }, 300);
-
-
-
-     }
-
-
-
-
-
-
-
-     function setView(type) {
-
-
-
-         let metaViewport = document.querySelector("meta[name=viewport]");
-
-
-
-         if (type === 'mobile') {
-
-
-
-             metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-
-
-
-         } else if (type === 'desktop') {
-
-
-
-             metaViewport.setAttribute('content', 'width=1200');
-
-
-
-         }
-
-
-
-         closeAllModals();
-
-
-
-     }
-
-
-
-
-      // 3D Параллакс-эффект для приветственного экрана
-
- const welcomeScreen = document.getElementById('welcome-screen');
-
- const card3D = document.getElementById('3d-card');
-
-
-
- if (welcomeScreen && card3D) {
-
-     welcomeScreen.addEventListener('mousemove', (e) => {
-
-         // Вычисляем позицию мыши от центра экрана
-
-         let xAxis = (window.innerWidth / 2 - e.pageX) / 25; 
-
-         let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-
-         card3D.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-
-     });
-
-
-
-     // Возвращаем на место, если мышь ушла
-
-     welcomeScreen.addEventListener('mouseleave', () => {
-
-         card3D.style.transition = 'all 0.5s ease';
-
-         card3D.style.transform = `rotateY(0deg) rotateX(0deg)`;
-
-     });
-
-
-
-     // Убираем transition при движении для моментальной реакции
-
-     welcomeScreen.addEventListener('mouseenter', () => {
-
-         card3D.style.transition = 'none';
-
-     });
-
- }
-
-
-
-
- </script>
-
-
-
-
+</script>
 
 
 
 </body>
 
-
-
 </html>
-
 
