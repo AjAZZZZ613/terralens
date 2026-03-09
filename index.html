@@ -1066,6 +1066,46 @@
 }
 
 
+ /* Начальное состояние элементов до прокрутки */
+
+.reveal {
+
+    opacity: 0;
+
+    transform: translateY(40px) scale(0.95);
+
+    transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    filter: blur(10px); /* Эффект расфокусированного стекла */
+
+}
+
+
+
+/* Состояние, когда элемент появился на экране */
+
+.reveal.active {
+
+    opacity: 1;
+
+    transform: translateY(0) scale(1);
+
+    filter: blur(0px);
+
+}
+
+
+
+/* Задержка для карточек в сетке, чтобы они вылетали по очереди */
+
+.services-grid .s-card:nth-child(1) { transition-delay: 0.1s; }
+
+.services-grid .s-card:nth-child(2) { transition-delay: 0.2s; }
+
+.services-grid .s-card:nth-child(3) { transition-delay: 0.3s; }
+
+
+
 
 </style>
 
@@ -2584,6 +2624,7 @@ function startApp() {
 
 
 </html>
+
 
 
 
