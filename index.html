@@ -48,245 +48,273 @@
 
             --dark: #2f3542;
 
-            --bg: #f1f2f6;
+            --glass: rgba(255, 255, 255, 0.75);
 
-            --text: #2f3542;
+            --glass-border: rgba(255, 255, 255, 0.4);
 
-            --glass: rgba(255, 255, 255, 0.9);
+            --shadow: 0 15px 35px rgba(0,0,0,0.1);
 
-            --card-bg: rgba(255, 255, 255, 0.8);
-
-            --shadow: 0 20px 40px rgba(0,0,0,0.12);
-
-            --nav-bg: rgba(255, 255, 255, 0.85);
+            --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 
         }
 
 
 
-        [data-theme="dark"] {
-
-            --bg: #0f172a;
-
-            --text: #ffffff;
-
-            --glass: rgba(30, 41, 59, 0.9);
-
-            --card-bg: rgba(30, 41, 59, 0.7);
-
-            --nav-bg: rgba(15, 23, 42, 0.9);
-
-        }
-
-
-
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); transition: background 0.5s, color 0.5s; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Nunito', sans-serif; overflow: hidden; background: #0f172a; }
 
         
 
-        /* Карта скрыта по умолчанию */
+        #map { 
 
-        #map { width: 100vw; height: 100vh; z-index: 0; opacity: 0; transition: opacity 1s ease; position: fixed; inset: 0; }
+            width: 100vw; 
 
-        .ui-element { opacity: 0; transition: 1s; pointer-events: none; }
+            height: 100vh; 
 
-        .ui-element.show { opacity: 1; pointer-events: auto; }
+            z-index: 0; 
 
+            opacity: 0; 
 
+            filter: grayscale(0.2) contrast(1.1);
 
-        /* --- LANDING PAGE (WELCOME SCREEN) --- */
-
-        #welcome-page {
-
-            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-
-            overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;
+            transition: opacity 2s ease, filter 2s ease; 
 
         }
 
 
 
-        .landing-nav {
+        /* --- UI ЭЛЕМЕНТЫ: ОБЩИЕ ПРАВИЛА --- */
 
-            position: fixed; top: 0; width: 100%; padding: 15px 50px; 
+        .ui-element {
 
-            display: flex; justify-content: space-between; align-items: center;
+            opacity: 0;
 
-            background: var(--nav-bg); backdrop-filter: blur(15px); z-index: 1000; box-sizing: border-box;
+            transform: translateY(20px);
 
-            border-bottom: 1px solid rgba(128,128,128,0.1);
+            transition: var(--transition);
+
+        }
+
+        .ui-element.visible {
+
+            opacity: 1;
+
+            transform: translateY(0);
 
         }
 
 
 
-        .nav-controls { display: flex; gap: 15px; align-items: center; }
+        /* --- GLASSMORPHISM STYLE --- */
 
-        .nav-btn { 
+        .glass-panel {
 
-            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2); 
+            background: var(--glass);
 
-            padding: 8px 15px; border-radius: 12px; cursor: pointer; color: var(--text); font-weight: 800; font-size: 16px;
+            backdrop-filter: blur(15px) saturate(180%);
+
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+
+            border: 1px solid var(--glass-border);
+
+            border-radius: 24px;
+
+            box-shadow: var(--shadow);
+
+        }
+
+
+
+        /* --- КНОПКИ: СТИЛЬ И АНИМАЦИЯ --- */
+
+        button { 
+
+            border: none; 
+
+            outline: none; 
+
+            cursor: pointer; 
+
+            transition: var(--transition);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+
+        }
+
+        button:hover { 
+
+            transform: translateY(-3px) scale(1.02); 
+
+            filter: brightness(1.1);
+
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+
+        }
+
+        button:active { transform: translateY(0) scale(0.96); }
+
+
+
+        .menu-btn {  
+
+            background: white; 
+
+            padding: 12px 20px; 
+
+            border-radius: 18px; 
+
+            font-weight: 800; 
+
+            color: var(--dark);
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
+        }
+
+        .menu-btn.active { 
+
+            background: var(--blue); 
+
+            color: white; 
+
+            box-shadow: 0 8px 15px rgba(55, 66, 250, 0.3); 
 
         }
 
 
 
-        .start-btn-top { background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 50px; font-weight: 900; cursor: pointer; }
+        /* --- ПОИСК --- */
 
+        .search-wrapper {
 
+            position: absolute; top: 25px; left: 50%; transform: translateX(-50%) translateY(20px);
 
-        /* Sections */
-
-        .hero-section { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; box-sizing: border-box; }
-
-        .glass-card { 
-
-            background: var(--card-bg); backdrop-filter: blur(20px); 
-
-            padding: 50px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
-
-            text-align: center; max-width: 600px; z-index: 10; box-shadow: var(--shadow);
+            z-index: 1000; display: flex; padding: 8px; border-radius: 50px; width: 400px;
 
         }
 
-        .hero-section h1 { font-size: clamp(24px, 5vw, 42px); font-weight: 900; margin-bottom: 20px; }
+        .search-input { 
+
+            border: none; background: transparent; padding: 0 20px; flex: 1; 
+
+            font-weight: 700; font-size: 16px; outline: none; color: var(--dark);
+
+        }
 
 
 
-        .landing-section { padding: 100px 20px; text-align: center; max-width: 1000px; margin: 0 auto; }
+        /* --- БОКОВОЕ МЕНЮ И ОКНА --- */
 
-        .landing-section h2 { font-size: 32px; font-weight: 900; margin-bottom: 50px; color: var(--primary); }
+        .side-menu-btns { position: absolute; top: 90px; left: 25px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
 
+        
 
+        .window {
 
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+            opacity: 0; visibility: hidden; transform: scale(0.9) translateY(30px);
 
-        .s-card { background: var(--card-bg); padding: 40px; border-radius: 30px; box-shadow: var(--shadow); border: 1px solid rgba(128,128,128,0.1); }
+            transition: var(--transition); pointer-events: none;
 
-        .s-card h3 { font-size: 40px; margin: 0 0 15px; }
+        }
 
-
-
-        /* Timeline */
-
-        .timeline { position: relative; margin-top: 50px; display: flex; flex-direction: column; gap: 40px; align-items: center; }
-
-        .t-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--primary); opacity: 0.3; transform: translateX(-50%); }
-
-        .t-step { position: relative; z-index: 2; display: flex; align-items: center; gap: 25px; width: 100%; max-width: 500px; text-align: left; background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); }
-
-        .t-dot { min-width: 45px; height: 45px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; }
+        .window.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); pointer-events: auto; }
 
 
 
-        /* FAQ */
-
-        .faq-container { max-width: 700px; margin: 0 auto; text-align: left; }
-
-        .faq-item { background: var(--card-bg); margin-bottom: 15px; border-radius: 20px; padding: 25px; cursor: pointer; transition: 0.3s; }
-
-        .faq-item:hover { transform: translateX(10px); }
-
-        .faq-q { font-weight: 900; font-size: 18px; color: var(--primary); }
-
-        .faq-a { margin-top: 10px; font-size: 15px; opacity: 0.8; line-height: 1.6; }
-
-
-
-        /* Blobs */
-
-        .bg-blobs { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
-
-        .blob { position: absolute; width: 45vw; height: 45vw; filter: blur(100px); opacity: 0.3; border-radius: 50%; animation: floatBlob 20s infinite alternate; }
-
-        .b1 { background: var(--primary); top: -10%; left: -10%; }
-
-        .b2 { background: var(--blue); bottom: -10%; right: -10%; animation-delay: -10s; }
-
-        @keyframes floatBlob { to { transform: translate(10vw, 10vh) scale(1.2); } }
-
-
-
-        /* Animations */
-
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-        .floating { animation: float 4s ease-in-out infinite; }
-
-
-
-        /* --- UI ELEMENTS (MAP OVERLAYS) --- */
-
-        .search-wrapper { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; background: var(--glass); padding: 8px; border-radius: 50px; box-shadow: var(--shadow); }
-
-        .search-input { border: none; background: transparent; padding: 0 20px; width: 300px; font-weight: 700; font-size: 16px; outline: none; color: var(--text); }
-
-        .side-menu-btns { position: absolute; top: 100px; left: 25px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-
-        .glass-panel { background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.2); color: var(--text); }
-
-        .menu-btn { background: var(--glass); padding: 14px 22px; border-radius: 20px; font-weight: 800; color: var(--text); border: 1px solid rgba(128,128,128,0.1); cursor: pointer; }
-
-        .menu-btn.active { background: var(--blue); color: white; }
-
-
-
-        #info-card { position: absolute; top: 25px; right: 25px; width: 340px; z-index: 1001; padding: 30px; }
+        #info-card { position: absolute; top: 25px; right: 25px; width: 340px; z-index: 1001; padding: 25px; }
 
         #chat-wrapper { position: absolute; bottom: 25px; left: 25px; width: 360px; z-index: 1001; }
 
 
 
-        .bot-head { width: 80px; height: 70px; background: var(--primary); border-radius: 24px; border: 4px solid #fff; position: relative; display: flex; justify-content: center; align-items: center; }
+        /* --- BOT VISUALS --- */
 
-        .bot-face { width: 55px; height: 35px; background: #2f3542; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; }
+        .bot-head {
 
-        .bot-eye { width: 8px; height: 12px; background: #7bed9f; border-radius: 4px; box-shadow: 0 0 10px #7bed9f; }
+            width: 70px; height: 60px; background: var(--primary); border-radius: 20px;
 
+            border: 3px solid #fff; position: relative; display: flex; justify-content: center; align-items: center;
 
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);
 
-        #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        }
 
-        .bubble { padding: 14px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; max-width: 85%; }
+        .bot-face { width: 45px; height: 30px; background: #2f3542; border-radius: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
 
-        .ai-msg { background: rgba(128,128,128,0.1); align-self: flex-start; }
-
-        .user-msg { background: var(--blue); color: white; align-self: flex-end; }
-
-
-
-        #rating-widget { position: absolute; bottom: 25px; right: 25px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .bot-eye { width: 7px; height: 10px; background: #7bed9f; border-radius: 3px; box-shadow: 0 0 8px #7bed9f; animation: blink 4s infinite; }
 
 
 
-        .main-side-menu { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: var(--bg); box-shadow: 5px 0 30px rgba(0,0,0,0.15); z-index: 11000; transition: 0.4s; padding: 25px; }
+        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
 
-        .main-side-menu.open { left: 0; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        
-
-        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: var(--bg); padding: 30px; border-radius: 25px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 12001; display: none; opacity: 0; transition: 0.3s; }
-
-        .custom-modal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); display: block; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 12000; display: none; }
+        .floating { animation: float 4s ease-in-out infinite; }
 
 
+
+        /* --- CHAT LOG --- */
+
+        #chat-log { height: 300px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.3); }
+
+        .bubble { padding: 12px 16px; border-radius: 18px; font-size: 14px; font-weight: 700; max-width: 80%; line-height: 1.4; animation: popIn 0.3s ease-out forwards; }
+
+        .ai-msg { background: white; align-self: flex-start; color: var(--dark); border-bottom-left-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+
+        .user-msg { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+
+
+        /* --- ЭКРАН ПРИВЕТСТВИЯ --- */
+
+        #welcome-screen {
+
+            position: fixed; inset: 0; background: #0f172a; z-index: 9999;
+
+            display: flex; align-items: center; justify-content: center; transition: 1s ease-in-out;
+
+        }
+
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; z-index: 1; animation: floatBlob 15s infinite alternate; }
+
+        .blob-blue { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--blue); }
+
+        .blob-red { bottom: -10%; right: -10%; width: 500px; height: 500px; background: var(--primary); animation-delay: -5s; }
+
+        @keyframes floatBlob { from { transform: translate(0,0); } to { transform: translate(100px, 50px); } }
+
+
+
+        .glass-hero-card {
+
+            position: relative; z-index: 10; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(30px);
+
+            border: 1px solid rgba(255,255,255,0.1); padding: 50px; border-radius: 40px; text-align: center;
+
+            max-width: 500px; color: white; box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+
+        }
+
+
+
+        /* --- МОБИЛЬНАЯ АДАПТАЦИЯ --- */
 
         @media (max-width: 768px) {
 
-            .landing-nav { padding: 10px 20px; }
+            .search-wrapper { width: 90%; top: 80px; }
 
-            .logo-text { display: none; }
+            .side-menu-btns { top: auto; bottom: 20px; left: 50%; transform: translateX(-50%); flex-direction: row; width: 95%; justify-content: center; }
 
-            .hero-section h1 { font-size: 28px; }
+            #info-card { top: 140px; right: 5%; width: 90%; }
 
-            .side-menu-btns { top: auto; bottom: 100px; left: 10px; flex-direction: row; flex-wrap: wrap; }
-
-            #info-card, #chat-wrapper { width: 90%; left: 50%; transform: translateX(-50%); }
-
-            .search-wrapper { width: 80%; top: 80px; }
+            #chat-wrapper { bottom: 90px; left: 5%; width: 90%; }
 
         }
 
@@ -298,173 +326,31 @@
 
 
 
-<div id="welcome-page">
+<div id="welcome-screen">
 
-    <nav class="landing-nav">
+    <div class="bg-blob blob-blue"></div>
 
-        <div class="logo-text" style="font-weight: 900; font-size: 22px; letter-spacing: 1px;">TerraLens</div>
+    <div class="bg-blob blob-red"></div>
 
-        <div class="nav-controls">
+    <div class="glass-hero-card" id="hero-card">
 
-            <button id="theme-toggle" class="nav-btn" onclick="toggleTheme()">🌙</button>
+        <div class="bot-head floating" style="margin: 0 auto 30px;">
 
-            <button id="lang-toggle" class="nav-btn" onclick="toggleLang()">RU</button>
-
-            <button class="start-btn-top" onclick="startApp()" data-ru="Начать работу ✨" data-en="Get Started ✨">Начать работу ✨</button>
+            <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
 
         </div>
 
-    </nav>
+        <h1 style="font-size: 38px; font-weight: 900; margin-bottom: 15px;">TerraLens AI</h1>
 
+        <p style="font-size: 18px; opacity: 0.8; margin-bottom: 35px; font-weight: 600;">Ваш персональный ИИ-проводник по планете Земля.</p>
 
+        <button class="menu-btn" onclick="startApp()" style="margin: 0 auto; padding: 18px 40px; font-size: 18px; background: white; color: black; width: 100%;">
 
-    <section class="hero-section">
+            Начать исследование ✨
 
-        <div class="bg-blobs">
+        </button>
 
-            <div class="blob b1"></div>
-
-            <div class="blob b2"></div>
-
-        </div>
-
-        <div class="glass-card">
-
-            <div class="bot-head floating" style="margin: 0 auto 20px; border-radius: 20px;">
-
-                <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-
-            </div>
-
-            <h1 data-ru="Твой умный гид по миру" data-en="Your Smart World Guide">Твой умный гид по миру</h1>
-
-            <p style="font-size: 18px; opacity: 0.8; font-weight: 600;" data-ru="Исследуй планету, узнавай факты и общайся с ИИ на интерактивной карте." data-en="Explore the planet, learn facts, and chat with AI on an interactive map.">
-
-                Исследуй планету, узнавай факты и общайся с ИИ на интерактивной карте.
-
-            </p>
-
-            <button class="start-btn-top" style="margin-top: 30px; padding: 15px 40px; font-size: 18px;" onclick="startApp()" data-ru="Открыть карту" data-en="Open Map">Открыть карту</button>
-
-        </div>
-
-    </section>
-
-
-
-    <section class="landing-section">
-
-        <h2 data-ru="Наши услуги" data-en="Our Services">Наши услуги</h2>
-
-        <div class="services-grid">
-
-            <div class="s-card">
-
-                <h3>🌍</h3>
-
-                <h4 data-ru="Интерактивность" data-en="Interactivity">Интерактивность</h4>
-
-                <p data-ru="Нажимай на любую точку мира и получай мгновенную информацию." data-en="Click anywhere in the world to get instant information.">Нажимай на любую точку мира и получай мгновенную информацию.</p>
-
-            </div>
-
-            <div class="s-card">
-
-                <h3>🤖</h3>
-
-                <h4 data-ru="ИИ Помощник" data-en="AI Assistant">ИИ Помощник</h4>
-
-                <p data-ru="TerraBot на базе Gemini ответит на любые географические вопросы." data-en="TerraBot powered by Gemini will answer any geographic questions.">TerraBot на базе Gemini ответит на любые географические вопросы.</p>
-
-            </div>
-
-            <div class="s-card">
-
-                <h3>📊</h3>
-
-                <h4 data-ru="Точные данные" data-en="Live Data">Точные данные</h4>
-
-                <p data-ru="Погода, время, валюта и история мест в реальном времени." data-en="Weather, time, currency and history of places in real time.">Погода, время, валюта и история мест в реальном времени.</p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <section class="landing-section">
-
-        <h2 data-ru="Как мы работаем" data-en="How We Work">Как мы работаем</h2>
-
-        <div class="timeline">
-
-            <div class="t-line"></div>
-
-            <div class="t-step">
-
-                <div class="t-dot">1</div>
-
-                <p data-ru="Услышать мнение клиентов" data-en="Listen to customers">Услышать мнение клиентов</p>
-
-            </div>
-
-            <div class="t-step">
-
-                <div class="t-dot">2</div>
-
-                <p data-ru="Пишем код и дорабатываем идеи" data-en="Coding and ideas">Пишем код и дорабатываем свои идеи</p>
-
-            </div>
-
-            <div class="t-step">
-
-                <div class="t-dot">3</div>
-
-                <p data-ru="Даем попробовать тестировщикам" data-en="Beta testing">Даем попробовать тестировщикам</p>
-
-            </div>
-
-            <div class="t-step">
-
-                <div class="t-dot">4</div>
-
-                <p data-ru="Публикуем обновление" data-en="Publish update">Публикуем обновление</p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <section class="landing-section">
-
-        <h2 data-ru="Частые вопросы" data-en="FAQ">Частые вопросы</h2>
-
-        <div class="faq-container">
-
-            <div class="faq-item">
-
-                <div class="faq-q" data-ru="Это бесплатно?" data-en="Is it free?">Это бесплатно?</div>
-
-                <div class="faq-a" data-ru="Да! Все основные функции поиска и общения с ИИ доступны бесплатно." data-en="Yes! All core search and AI chat features are available for free.">Да! Все основные функции поиска и общения с ИИ доступны бесплатно.</div>
-
-            </div>
-
-            <div class="faq-item">
-
-                <div class="faq-q" data-ru="Как работает ИИ?" data-en="How does AI work?">Как работает ИИ?</div>
-
-                <div class="faq-a" data-ru="Мы используем API Google Gemini для обработки ваших запросов о мире." data-en="We use Google Gemini API to process your queries about the world.">Мы используем API Google Gemini для обработки ваших запросов о мире.</div>
-
-            </div>
-
-        </div>
-
-    </section>
+    </div>
 
 </div>
 
@@ -474,63 +360,75 @@
 
 
 
-<button id="menu-toggle-btn" class="ui-element" onclick="openMenu()">☰ МЕНЮ</button>
+<button id="menu-toggle-btn" class="ui-element menu-btn" style="position: absolute; top: 25px; left: 25px; z-index: 1500;" onclick="openMenu()">☰ МЕНЮ</button>
 
 
 
-<div class="ui-element search-wrapper" id="ui-search">
+<div class="ui-element glass-panel search-wrapper" id="ui-search">
 
-    <input type="text" class="search-input" id="global-search" placeholder="Куда отправимся?">
+    <input type="text" class="search-input" id="global-search" placeholder="Поиск локации...">
 
-    <button onclick="globalSearch()" style="background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 900; border:none; cursor:pointer;">ПОИСК</button>
-
-</div>
-
-
-
-<div class="ui-element side-menu-btns" id="ui-menu">
-
-    <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ КАРТА</button>
-
-    <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ СПУТНИК</button>
-
-    <button class="menu-btn" style="background:var(--primary); color:white;" onclick="toggleChat()">🤖 AI TERRABOT</button>
+    <button onclick="globalSearch()" style="background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 900;">НАЙТИ</button>
 
 </div>
 
 
 
-<div id="info-card" class="glass-panel window floating">
+<div class="ui-element side-menu-btns" id="ui-btns">
+
+    <button class="menu-btn active" id="btn-map" onclick="setMode('map')">🗺️ Карта</button>
+
+    <button class="menu-btn" id="btn-sat" onclick="setMode('sat')">🛰️ Спутник</button>
+
+    <button class="menu-btn" onclick="toggleChat()" style="background: var(--primary); color: white;">🤖 TerraBot</button>
+
+</div>
+
+
+
+<div id="info-card" class="glass-panel window">
 
     <div id="info-content">
 
-        <div style="display:flex; align-items:center; gap:20px;">
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom: 20px;">
 
-            <img id="card-flag" src="" style="width:60px; border-radius:10px; display:none;">
+            <img id="card-flag" src="" style="width:50px; border-radius:8px; display:none; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
 
             <div>
 
-                <h2 id="card-city" style="margin:0; font-size:26px; font-weight:900;">--</h2>
+                <h2 id="card-city" style="margin:0; font-size:24px; font-weight:900;">--</h2>
 
-                <div id="card-country" style="opacity:0.6; font-weight:800;">--</div>
+                <div id="card-country" style="opacity:0.6; font-weight:700;">--</div>
 
             </div>
 
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:20px 0;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
 
-            <div><div style="font-size:11px; font-weight:800; color:var(--primary);">ТЕМПЕРАТУРА</div><div id="card-temp" style="font-size:18px; font-weight:900;">--</div></div>
+            <div class="glass-panel" style="padding: 12px; background: rgba(255,255,255,0.5);">
 
-            <div style="text-align:right;"><div style="font-size:11px; font-weight:800; opacity:0.6;">ВРЕМЯ</div><div id="card-time" style="font-size:18px; font-weight:900;">--</div></div>
+                <small style="font-weight:800; color:var(--primary);">ТЕМП.</small>
+
+                <div id="card-temp" style="font-size:18px; font-weight:900;">--</div>
+
+            </div>
+
+            <div class="glass-panel" style="padding: 12px; background: rgba(255,255,255,0.5);">
+
+                <small style="font-weight:800; color:var(--blue);">ВРЕМЯ</small>
+
+                <div id="card-time" style="font-size:18px; font-weight:900;">--</div>
+
+            </div>
 
         </div>
 
-        <div id="card-wiki" style="font-size:14px; line-height:1.6; max-height:150px; overflow-y:auto; padding:15px; background:rgba(0,0,0,0.05); border-radius:20px;"></div>
+        <p id="card-wiki" style="margin-top:20px; font-size:14px; color:#444; line-height:1.5; max-height:120px; overflow-y:auto;"></p>
 
     </div>
 
-    <button onclick="closeWindow('info-card')" style="width:100%; margin-top:25px; padding:15px; border-radius:20px; background:rgba(128,128,128,0.2); font-weight:800; color:var(--text); border:none; cursor:pointer;">ЗАКРЫТЬ</button>
+    <button onclick="closeWindow('info-card')" style="width:100%; margin-top:20px; padding:12px; border-radius:15px; background: rgba(0,0,0,0.05); font-weight:800;">ЗАКРЫТЬ</button>
 
 </div>
 
@@ -538,17 +436,23 @@
 
 <div id="chat-wrapper" class="window">
 
-    <div class="glass-panel" style="overflow:hidden; display:flex; flex-direction:column;">
+    <div class="bot-head floating" style="margin-bottom: -15px; margin-left: 25px; z-index:10; transform: scale(0.9);">
 
-        <div style="padding:20px; text-align:center; font-weight:900; color:var(--primary); background:var(--card-bg);">TerraBot Gemini</div>
+        <div class="bot-face"><div class="bot-eye"></div><div class="bot-eye"></div></div>
+
+    </div>
+
+    <div class="glass-panel" style="overflow:hidden;">
+
+        <div style="padding:35px 20px 15px; text-align:center; font-weight:900; color:var(--primary); background:rgba(255,255,255,0.5);">TerraBot Gemini</div>
 
         <div id="chat-log"></div>
 
-        <div style="padding:15px; background:var(--card-bg); display:flex; gap:10px; border-top:1px solid rgba(128,128,128,0.1);">
+        <div style="padding:15px; background:white; display:flex; gap:10px;">
 
-            <input type="text" id="chat-input" placeholder="Спроси меня..." style="flex:1; border:none; outline:none; font-weight:700; background:transparent; color:var(--text);">
+            <input type="text" id="chat-input" placeholder="Спроси меня о месте..." style="flex:1; border:none; outline:none; font-weight:700;">
 
-            <button onclick="sendChat()" style="background:var(--primary); color:white; width:45px; height:45px; border-radius:50%; border:none; cursor:pointer;">➤</button>
+            <button onclick="sendChat()" style="background:var(--primary); color:white; width:40px; height:40px; border-radius:50%;">➤</button>
 
         </div>
 
@@ -558,65 +462,17 @@
 
 
 
-<div id="main-menu" class="main-side-menu">
-
-    <button onclick="closeMenu()" style="float:right; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text);">✖</button>
-
-    <div style="font-size: 24px; font-weight: 900; margin-bottom: 30px;">TerraLens</div>
-
-    <button class="menu-btn" style="width:100%; margin-bottom:10px; text-align:left;" onclick="openModal('modal-donate')">💖 Поддержка</button>
-
-    <button class="menu-btn" style="width:100%; margin-bottom:10px; text-align:left;" onclick="openModal('modal-settings')">⚙️ Настройки</button>
-
-</div>
-
-
-
-<div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
-
-<div id="modal-donate" class="custom-modal">
-
-    <h3>Поддержать проект</h3>
-
-    <p>Все средства идут на развитие ИИ и серверов.</p>
-
-    <a href="https://pay.cloudtips.ru/p/69a37267" target="_blank" class="start-btn-top" style="display:inline-block; text-decoration:none;">Поддержать ❤️</a>
-
-</div>
-
-
-
-<div id="modal-settings" class="custom-modal">
-
-    <h3>Настройки</h3>
-
-    <p>Выберите режим отображения:</p>
-
-    <button class="menu-btn" style="width:100%; margin-bottom:10px;" onclick="setView('desktop')">💻 Десктоп</button>
-
-    <button class="menu-btn" style="width:100%;" onclick="setView('mobile')">📱 Мобильная</button>
-
-</div>
-
-
-
 <script>
+
+    // Config & Init
 
     const firebaseConfig = {
 
         apiKey: "AIzaSyAYSeXH7-5Y6iEVO0uPWiVeeICyImayWn4",
 
-        authDomain: "terralens-votes.firebaseapp.com",
-
         databaseURL: "https://terralens-votes-default-rtdb.europe-west1.firebasedatabase.app",
 
-        projectId: "terralens-votes",
-
-        storageBucket: "terralens-votes.firebasestorage.app",
-
-        messagingSenderId: "306757191202",
-
-        appId: "1:306757191202:web:d9c18b023254b235bfec7b"
+        projectId: "terralens-votes"
 
     };
 
@@ -626,71 +482,39 @@
 
 
 
-    let map, tileLayer, currentLang = 'RU';
-
-
-
-    function toggleTheme() {
-
-        const body = document.documentElement;
-
-        const btn = document.getElementById('theme-toggle');
-
-        if (body.getAttribute('data-theme') === 'dark') {
-
-            body.removeAttribute('data-theme');
-
-            btn.innerText = '🌙';
-
-        } else {
-
-            body.setAttribute('data-theme', 'dark');
-
-            btn.innerText = '☀️';
-
-        }
-
-    }
-
-
-
-    function toggleLang() {
-
-        currentLang = currentLang === 'RU' ? 'EN' : 'RU';
-
-        document.getElementById('lang-toggle').innerText = currentLang;
-
-        document.querySelectorAll('[data-ru]').forEach(el => {
-
-            el.innerText = el.getAttribute(`data-${currentLang.toLowerCase()}`);
-
-        });
-
-        document.getElementById('global-search').placeholder = currentLang === 'RU' ? 'Куда отправимся?' : 'Where to go?';
-
-    }
+    let map, tileLayer;
 
 
 
     function startApp() {
 
-        const page = document.getElementById('welcome-page');
+        const welcome = document.getElementById('welcome-screen');
 
-        page.style.transition = '1s';
+        welcome.style.opacity = '0';
 
-        page.style.opacity = '0';
-
-        page.style.pointerEvents = 'none';
+        welcome.style.transform = 'scale(1.1)';
 
         
 
         setTimeout(() => {
 
-            page.style.display = 'none';
+            welcome.style.display = 'none';
 
             document.getElementById('map').style.opacity = '1';
 
-            document.querySelectorAll('.ui-element').forEach(el => el.classList.add('show'));
+            
+
+            // Плавное поочередное появление элементов
+
+            const elements = document.querySelectorAll('.ui-element');
+
+            elements.forEach((el, i) => {
+
+                setTimeout(() => el.classList.add('visible'), i * 200 + 500);
+
+            });
+
+
 
             initMap();
 
@@ -702,13 +526,85 @@
 
     function initMap() {
 
-        if (map) return;
-
         map = L.map('map', { center: [20, 0], zoom: 3, zoomControl: false, attributionControl: false });
 
         tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         map.on('click', e => fetchInfo(e.latlng.lat, e.latlng.lng));
+
+    }
+
+
+
+    async function fetchInfo(lat, lon) {
+
+        const card = document.getElementById('info-card');
+
+        card.classList.add('active');
+
+        try {
+
+            const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru`).then(r=>r.json());
+
+            const city = geo.address.city || geo.address.town || geo.address.village || "Точка на карте";
+
+            
+
+            document.getElementById('card-city').innerText = city;
+
+            document.getElementById('card-country').innerText = geo.address.country || "";
+
+            
+
+            const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`).then(r=>r.json());
+
+            document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
+
+            
+
+            const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+            document.getElementById('card-time').innerText = time;
+
+
+
+            const wiki = await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
+
+            document.getElementById('card-wiki').innerText = wiki.extract || "Информация не найдена.";
+
+            
+
+            if(geo.address.country_code) {
+
+                const flag = document.getElementById('card-flag');
+
+                flag.src = `https://flagsapi.com/${geo.address.country_code.toUpperCase()}/flat/64.png`;
+
+                flag.style.display = 'block';
+
+            }
+
+        } catch(e) { console.error(e); }
+
+    }
+
+
+
+    async function globalSearch() {
+
+        const q = document.getElementById('global-search').value;
+
+        if(!q) return;
+
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(r=>r.json());
+
+        if(res[0]) {
+
+            map.flyTo([res[0].lat, res[0].lon], 10);
+
+            fetchInfo(res[0].lat, res[0].lon);
+
+        }
 
     }
 
@@ -726,107 +622,27 @@
 
 
 
-    async function fetchInfo(lat, lon) {
-
-        document.getElementById('info-card').classList.add('active');
-
-        try {
-
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${currentLang.toLowerCase()}`).then(r=>r.json());
-
-            const city = res.address.city || res.address.town || res.address.state || "Место";
-
-            document.getElementById('card-city').innerText = city;
-
-            document.getElementById('card-country').innerText = res.address.country || "";
-
-            
-
-            const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`).then(r=>r.json());
-
-            document.getElementById('card-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
-
-            document.getElementById('card-time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-            
-
-            const wiki = await fetch(`https://${currentLang.toLowerCase()}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`).then(r=>r.json());
-
-            document.getElementById('card-wiki').innerText = wiki.extract || (currentLang === 'RU' ? "Нет описания." : "No description.");
-
-        } catch(e) {}
-
-    }
-
-
-
-    async function globalSearch() {
-
-        const q = document.getElementById('global-search').value;
-
-        if(!q) return;
-
-        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`).then(res => res.json());
-
-        if(r[0]) {
-
-            map.flyTo([r[0].lat, r[0].lon], 10);
-
-            fetchInfo(r[0].lat, r[0].lon);
-
-        }
-
-    }
-
-
-
     function toggleChat() { document.getElementById('chat-wrapper').classList.toggle('active'); }
 
     function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
 
-    function openMenu() { document.getElementById('main-menu').classList.add('open'); }
-
-    function closeMenu() { document.getElementById('main-menu').classList.remove('open'); }
-
-    function openModal(id) { closeMenu(); document.getElementById('modal-overlay').style.display = 'block'; document.getElementById(id).classList.add('show'); }
-
-    function closeAllModals() { document.getElementById('modal-overlay').style.display = 'none'; document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('show')); }
 
 
+    // 3D Parallax эффект для карточки приветствия
 
-    function sendChat() {
+    const hero = document.getElementById('hero-card');
 
-        const input = document.getElementById('chat-input'), log = document.getElementById('chat-log');
+    document.addEventListener('mousemove', (e) => {
 
-        if (!input.value.trim()) return;
+        if(document.getElementById('welcome-screen').style.display === 'none') return;
 
-        log.innerHTML += `<div class="bubble user-msg">${input.value}</div>`;
+        let x = (window.innerWidth / 2 - e.pageX) / 30;
 
-        const q = input.value;
+        let y = (window.innerHeight / 2 - e.pageY) / 30;
 
-        input.value = '';
+        hero.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
 
-        setTimeout(() => {
-
-            log.innerHTML += `<div class="bubble ai-msg">Я изучаю информацию о "${q}"...</div>`;
-
-            log.scrollTop = log.scrollHeight;
-
-        }, 500);
-
-    }
-
-
-
-    function setView(type) {
-
-        let meta = document.querySelector("meta[name=viewport]");
-
-        meta.setAttribute('content', type === 'mobile' ? 'width=device-width, initial-scale=1.0' : 'width=1200');
-
-        closeAllModals();
-
-    }
+    });
 
 </script>
 
