@@ -1153,7 +1153,7 @@
 
         </div>
 
-        <div class="glass-card main-card">
+        <div class="glass-card main-card reveal active">
 
             <div class="bot-head floating" style="margin: 0 auto 20px; border-radius: 20px;">
 
@@ -1177,15 +1177,15 @@
 
     <section class="landing-section">
 
-        <h2 data-ru="Наши услуги" data-en="Our Services">Наши услуги</h2>
+        <h2 class="reveal" data-ru="Наши услуги" data-en="Our Services">Наши услуги</h2>
 
         <div class="services-grid">
 
-            <div class="s-card"><h3>🌍</h3><p data-ru="Интерактивные карты" data-en="Interactive Maps">Интерактивные карты</p></div>
+            <div class="s-card reveal"><h3>🌍</h3><p data-ru="Интерактивные карты" data-en="Interactive Maps">Интерактивные карты</p></div>
 
-            <div class="s-card"><h3>🤖</h3><p data-ru="ИИ-помощник Gemini" data-en="Gemini AI Assistant">ИИ-помощник Gemini</p></div>
+            <div class="s-card reveal"><h3>🤖</h3><p data-ru="ИИ-помощник Gemini" data-en="Gemini AI Assistant">ИИ-помощник Gemini</p></div>
 
-            <div class="s-card"><h3>📊</h3><p data-ru="Данные в реальном времени" data-en="Real-time Data">Данные в реальном времени</p></div>
+            <div class="s-card reveal"><h3>📊</h3><p data-ru="Данные в реальном времени" data-en="Real-time Data">Данные в реальном времени</p></div>
 
         </div>
 
@@ -1195,19 +1195,19 @@
 
     <section class="landing-section">
 
-        <h2 data-ru="Как мы создаем сайт" data-en="How we work">Как мы создаем сайт</h2>
+        <h2 class="reveal" data-ru="Как мы создаем сайт" data-en="How we work">Как мы создаем сайт</h2>
 
         <div class="timeline">
 
             <div class="t-line"></div>
 
-            <div class="t-step"><div class="t-dot">1</div><p data-ru="Услышать мнение клиентов" data-en="Listen to customer feedback">Услышать мнение клиентов</p></div>
+            <div class="t-step reveal"><div class="t-dot">1</div><p data-ru="Услышать мнение клиентов" data-en="Listen to customer feedback">Услышать мнение клиентов</p></div>
 
-            <div class="t-step"><div class="t-dot">2</div><p data-ru="Пишем код и идеи" data-en="Writing code and ideas">Пишем код и дорабатываем идеи</p></div>
+            <div class="t-step reveal"><div class="t-dot">2</div><p data-ru="Пишем код и идеи" data-en="Writing code and ideas">Пишем код и дорабатываем идеи</p></div>
 
-            <div class="t-step"><div class="t-dot">3</div><p data-ru="Тестирование" data-en="Beta testing">Даем попробовать тестировщикам</p></div>
+            <div class="t-step reveal"><div class="t-dot">3</div><p data-ru="Тестирование" data-en="Beta testing">Даем попробовать тестировщикам</p></div>
 
-            <div class="t-step"><div class="t-dot">4</div><p data-ru="Публикация" data-en="Public release">Публикуем обновление</p></div>
+            <div class="t-step reveal"><div class="t-dot">4</div><p data-ru="Публикация" data-en="Public release">Публикуем обновление</p></div>
 
         </div>
 
@@ -1217,9 +1217,9 @@
 
     <section class="landing-section faq-section">
 
-        <h2 data-ru="Частые вопросы" data-en="FAQ">Частые вопросы</h2>
+        <h2 class="reveal" data-ru="Частые вопросы" data-en="FAQ">Частые вопросы</h2>
 
-        <div class="faq-item">
+        <div class="faq-item reveal">
 
             <div class="faq-q" data-ru="Это бесплатно?" data-en="Is it free?">Это бесплатно?</div>
 
@@ -1227,7 +1227,7 @@
 
         </div>
 
-        <div class="faq-item">
+        <div class="faq-item reveal">
 
             <div class="faq-q" data-ru="Как работает поиск?" data-en="How search works?">Как работает поиск?</div>
 
@@ -2606,6 +2606,47 @@ function startApp() {
 }
 
 
+ // Функция для запуска слежки за скроллом
+
+function initScrollReveal() {
+
+    const observer = new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            // Если блок показался в поле зрения хотя бы на 10%
+
+            if (entry.isIntersecting) {
+
+                entry.target.classList.add('active');
+
+            }
+
+        });
+
+    }, {
+
+        threshold: 0.1 // Процент видимости элемента для срабатывания
+
+    });
+
+
+
+    // Находим все элементы с классом reveal и вешаем на них слежку
+
+    document.querySelectorAll('.reveal').forEach(el => {
+
+        observer.observe(el);
+
+    });
+
+}
+
+
+
+// Запускаем слежку сразу при загрузке страницы
+
+window.addEventListener('DOMContentLoaded', initScrollReveal);
 
 
 
@@ -2624,6 +2665,7 @@ function startApp() {
 
 
 </html>
+
 
 
 
